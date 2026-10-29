@@ -3,6 +3,8 @@
 use App\Enums\Role;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\EnsureStoreApproved;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,8 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [EnsureAccountActive::class]);
-        $middleware->alias(['role' => EnsureRole::class]);
+        $middleware->web(append: [EnsureAccountActive::class, SecurityHeaders::class]);
+        // Razorpay signs webhooks itself; they cannot carry a CSRF token.
+        $middleware->validateCsrfTokens(except: ['webhooks/*']);
+        $middleware->alias(['role' => EnsureRole::class, 'store.approved' => EnsureStoreApproved::class]);
 
         $middleware->redirectGuestsTo(fn (Request $request) => route(Role::forPath($request->path())->loginRoute()));
         $middleware->redirectUsersTo(fn (Request $request) => route($request->user()->role->homeRoute()));

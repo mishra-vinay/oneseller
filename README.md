@@ -6,7 +6,7 @@ A multi-vendor marketplace: many independent sellers list products in one storef
 - Build plan, decisions and milestones: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md)
 - Deploying to shared hosting: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
 
-Stack: PHP 8.3+, Laravel 13, MySQL 8 (SQLite locally), Blade + Livewire + Tailwind CSS.
+Stack: PHP 8.3+, Laravel 13, MySQL 8 (SQLite locally), Blade + Tailwind CSS. Payments: Razorpay + Cash on Delivery.
 
 ## Local setup
 
@@ -16,10 +16,14 @@ npm install && npm run build
 cp .env.example .env
 php artisan key:generate
 touch database/database.sqlite
-php artisan migrate
-php artisan oneseller:create-admin
+php artisan migrate --seed   # demo marketplace; skip --seed for an empty one
+php artisan storage:link
 php artisan serve
 ```
+
+Demo accounts (password `password1`): `admin@example.com`, sellers `ravi@example.com` and `meera@example.com` (approved) and `kiran@example.com` (pending), buyer `buyer@example.com`. For an empty database, create an admin with `php artisan oneseller:create-admin`.
+
+Online payment appears at checkout only when the `RAZORPAY_*` keys are set in `.env` (use Razorpay test keys locally). Without them, checkout offers Cash on Delivery.
 
 Then open:
 
@@ -45,4 +49,6 @@ CI runs both on every pull request, with the tests against SQLite and MySQL.
 - **Money** is stored as integer paise and **commission** as basis points (1000 = 10%). Convert only at the edges with `App\Support\Money`.
 - **Roles**: one role per account (`admin`, `seller`, `buyer`), each with its own login page and URL area. The `role:` middleware guards each area.
 - **Settings** live in the `settings` table, read through `App\Support\Settings`, with defaults in `Settings::DEFAULTS`.
-- **Business rules** go in service/action classes, not controllers or Livewire components, so the future mobile API can reuse them.
+- **Business rules** live in `app/Services` (`OrderPlacement`, `Fulfilment`, `Ledger`, `ProductService`, `CartService`, …), not in controllers, so the future mobile API can call the same code.
+- **Seller isolation**: seller controllers extend `Seller\SellerController` and look everything up through `currentStore()`, so another store's IDs return 404. `tests/Feature/Seller/SellerIsolationTest.php` guards this.
+- **Orders**: one `Order` per checkout, one `SubOrder` per seller. Sellers are credited in the ledger when their sub-order is delivered.

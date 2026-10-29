@@ -1,4 +1,5 @@
 <x-layouts.store :title="__('My profile')">
+    <x-account-nav />
     <div class="grid gap-6 md:grid-cols-2">
         <section class="rounded-lg border border-stone-200 bg-white p-6">
             <h2 class="mb-4 text-lg font-semibold">{{ __('Profile') }}</h2>

@@ -8,7 +8,10 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -41,6 +44,31 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function store(): HasOne
+    {
+        return $this->hasOne(Store::class);
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class)->orderByDesc('is_default')->orderBy('id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'buyer_id');
+    }
+
+    public function scopeRole(Builder $query, Role $role): void
+    {
+        $query->where('role', $role);
+    }
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('status', AccountStatus::Active);
     }
 
     public function hasRole(Role $role): bool

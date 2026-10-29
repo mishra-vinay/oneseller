@@ -55,18 +55,36 @@ MAIL_USERNAME=...
 MAIL_PASSWORD=...
 MAIL_FROM_ADDRESS="orders@talkforweb.in"
 MAIL_FROM_NAME="OneSeller"
+
+RAZORPAY_KEY_ID=rzp_live_...
+RAZORPAY_KEY_SECRET=...
+RAZORPAY_WEBHOOK_SECRET=...
 ```
 
 Set up SPF, DKIM and DMARC DNS records for the sending domain as the email provider instructs, so order emails reach the inbox.
 
-## Queued jobs on shared hosting
+## Scheduled jobs (the one cron entry drives all of these)
 
-Shared hosting cannot keep a `queue:work` process running. Once queued emails arrive in later milestones, the scheduler processes the queue every minute:
+Defined in `routes/console.php`:
 
-```php
-// routes/console.php
-Schedule::command('queue:work --stop-when-empty --max-time=50')->everyMinute()->withoutOverlapping();
-```
+| Job | When | Why |
+|---|---|---|
+| `queue:work --stop-when-empty` | every minute | Sends queued emails. Shared hosting cannot keep a worker running. |
+| `oneseller:expire-unpaid-orders` | every 5 minutes | Cancels online orders not paid within 30 minutes and returns their stock. |
+| `oneseller:low-stock-digest` | daily 09:00 IST | Emails each seller their low-stock products. |
+
+## Razorpay
+
+1. Complete Razorpay KYC and switch the dashboard to Live mode.
+2. Copy the Key ID and Key Secret into `.env`.
+3. Webhooks: add `https://shop.talkforweb.in/webhooks/razorpay` with events `payment.captured` and `order.paid`, set a secret, and put it in `RAZORPAY_WEBHOOK_SECRET`. The webhook confirms payments even if the buyer closes the browser before returning.
+4. Refunds are issued from the Razorpay dashboard; then press "Mark refunded" on the order in `/admin/orders`.
+
+## Backups and monitoring
+
+- Turn on the host's daily MySQL backups, or add a cron job: `mysqldump --single-transaction oneseller | gzip > ~/backups/oneseller-$(date +\%F).sql.gz` and keep 14 days.
+- Back up `storage/app/public` (product images and logos) too.
+- Errors are logged to `storage/logs/laravel.log`. For alerts, add an error tracker such as Sentry (`composer require sentry/sentry-laravel` and set `SENTRY_LARAVEL_DSN`).
 
 ## Later deploys
 

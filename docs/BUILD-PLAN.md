@@ -11,7 +11,7 @@ Scope: web MVP for Admin, Seller and Buyer. The iOS and Android apps come later,
 |---|---|---|
 | Language / framework | **PHP 8.3+ with Laravel** (current stable release) | Runs on shared hosting with no Node or long-running process. Auth, queues, mail, policies and scheduling are built in. Laravel Sanctum later serves the mobile API from the same codebase. |
 | Database | **MySQL 8 / MariaDB 10.6+** | What shared hosting provides. Supports transactions and row locks (for stock) and FULLTEXT search. |
-| UI | **Blade + Livewire + Alpine.js + Tailwind CSS** | Server-rendered pages are good for SEO on the storefront. Livewire handles the interactive screens (inventory inline edit, cart, checkout steps) without a separate SPA. Assets are built locally or in CI, so the server never needs Node. |
+| UI | **Blade + Tailwind CSS**, plain HTML forms | Server-rendered pages are good for SEO on the storefront and work on any shared host. Every screen, including the inventory table and checkout steps, is a plain form, so no JavaScript framework is needed. Assets are built locally or in CI, so the server never needs Node. |
 | Payments | **Razorpay** (Standard Checkout + webhooks) + COD | India and INR, works with GST-registered businesses. All money settles into one account, which matches the MVP. Razorpay Route can do split settlement in phase 2. |
 | Email | **Brevo, Amazon SES or Postmark** over SMTP/API | The scope requires a dedicated delivery service. Set up SPF, DKIM and DMARC on talkforweb.in. |
 | Background jobs | Laravel **database queue**, run by cron (`schedule:run` every minute) | Shared hosting has no supervisor. Emails and the low-stock digest run as queued or scheduled jobs. |
@@ -67,7 +67,7 @@ order_sequences    year, last_value   (gap-safe numbering under row lock)
 
 ## 3. Core rules to get right
 
-**Seller isolation.** Every seller-side query goes through a `BelongsToStore` global scope that filters by the logged-in seller's `store_id`. Route model binding is also scoped, so an ID from another store returns 404. Policies are a second check. Automated tests try cross-store access on every seller route and must get 404. Sellers' customer views never select buyer emails.
+**Seller isolation.** Every seller-side lookup goes through the signed-in seller's store (`currentStore()->products()->findOrFail($id)`, `currentStore()->subOrders()…`), so an ID from another store returns 404. Automated tests try cross-store access on every seller route and must get 404. Sellers' customer views never select buyer emails.
 > Note: MySQL on shared hosting has no row-level security. The scope's "enforced at the database layer" is met in the data-access layer, which every query must pass through. True DB-level row security (PostgreSQL RLS) would need a VPS or managed database. See open questions.
 
 **Product approval.** Saving as draft or submitting sets status to `pending`, unless auto-approve is on. Editing name, description, price or images on an approved product sends it back to `pending`. Editing stock or publish state does not. Rejection stores a reason, and the seller is emailed.
@@ -159,12 +159,12 @@ Each milestone ends deployable to staging, with tests.
 ## 6. Progress
 
 - [x] **M0 — Foundation**: Laravel 13 app, three login areas with role middleware, deactivation logout, shared password reset, email verification, buyer registration and profile, settings page, `oneseller:create-admin`, CI (SQLite + MySQL), deployment guide.
-- [ ] M1 — Sellers & catalogue
-- [ ] M2 — Storefront
-- [ ] M3 — Cart, checkout, payment
-- [ ] M4 — Fulfilment & money
-- [ ] M5 — Dashboards, notifications, polish
-- [ ] M6 — Hardening & launch
+- [x] **M1 — Sellers & catalogue**: seller registration (account + store) with holding page; admin approve/reject/suspend/reactivate and per-seller commission; two-level categories with images, ordering, active toggle and reassign-before-delete; seller products with up to 5 resized images, draft/submit, re-review on live edits, rejection reasons; admin approval queue with bulk approve and force-deactivate; cross-store isolation tests.
+- [x] **M2 — Storefront**: home (categories, new arrivals, featured sellers), category pages with sub-categories, price/seller/in-stock filters and sorting in the URL, search (MySQL FULLTEXT, LIKE on SQLite), product page, store page, sitemap.xml, meta/canonical tags.
+- [x] **M3 — Cart, checkout, payment**: cart grouped by seller with per-seller shipping and free-shipping threshold; guest cart merged on login; address book; 3-step checkout; order + sub-orders in one locked transaction with stock reservation and commission snapshot; OS-YYYY-NNNNNN numbering; Razorpay (signed callback + webhook, idempotent) and COD; unpaid orders expire after 30 minutes and return stock.
+- [x] **M4 — Fulfilment & money**: seller accept / ship (courier + tracking) / deliver / cancel; buyer order history with per-seller status and tracking; admin order view, cancel a portion, record refunds; append-only ledger credited on delivery (with COD handling), seller earnings statement, admin payouts and adjustments.
+- [x] **M5 — Dashboards, notifications, polish**: seller and admin dashboards (7-day chart), inventory table, customers page (no emails), admin buyers page with deactivate, activity feed, every email in the notification matrix, in-panel notifications, daily low-stock digest.
+- [x] **M6 — Hardening & launch prep**: security headers, rate-limited login/reset, upload validation, webhook signatures, terms/privacy/refund page templates, demo seeder, browser run-through of the full buyer → seller → admin flow. **Remaining before go-live (needs you):** hosting details, Razorpay live keys, email provider, final subdomain/branding, legal review of the policy pages, GST/TCS check.
 
 ## 7. Original open questions
 

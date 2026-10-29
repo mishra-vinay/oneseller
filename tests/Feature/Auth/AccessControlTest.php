@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Enums\AccountStatus;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -41,7 +42,7 @@ class AccessControlTest extends TestCase
 
     public function test_deactivated_user_is_logged_out_on_next_request(): void
     {
-        $seller = User::factory()->seller()->create();
+        $seller = Store::factory()->create()->user;
 
         $this->actingAs($seller)->get('/seller')->assertOk();
 
