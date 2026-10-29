@@ -143,7 +143,30 @@ Each milestone ends deployable to staging, with tests.
 
 ---
 
-## 5. Open questions (need answers before or during M0)
+## 5. Decisions (confirmed 2026-10-29: "go with your recommendations")
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | Payment gateway | **Razorpay** (Standard Checkout + webhooks) plus COD. Start merchant KYC early. |
+| 2 | Hosting | Shared hosting per `docs/DEPLOYMENT.md`. Provider details still to be shared before the first deploy. |
+| 3 | Seller isolation | **Data-access layer** enforcement (scoped queries + scoped route binding + policies), proven by automated cross-store tests. No PostgreSQL RLS. |
+| 4 | When sellers are credited | **On delivery** of their sub-order. For **COD**, the seller's courier collects the cash, so the ledger posts the sale and commission plus a matching "COD collected by seller" debit. The balance then shows the commission the seller owes the platform. |
+| 5 | Commission base | **Item subtotal only.** The per-seller shipping charge goes to the seller, who ships. |
+| 6 | GST | Prices are entered **GST-inclusive**. GSTIN is stored per store. Tax invoices and e-commerce TCS reporting are deferred past MVP; confirm with an accountant before launch. |
+| 7 | Variants | **Variant-ready schema:** price, stock and SKU live on a `product_variants` table, and every product gets one default variant. The MVP UI shows a single variant, so size/colour later needs no data migration. |
+| 8 | Subdomain and branding | Still pending. Examples use `shop.talkforweb.in`. |
+
+## 6. Progress
+
+- [x] **M0 — Foundation**: Laravel 13 app, three login areas with role middleware, deactivation logout, shared password reset, email verification, buyer registration and profile, settings page, `oneseller:create-admin`, CI (SQLite + MySQL), deployment guide.
+- [ ] M1 — Sellers & catalogue
+- [ ] M2 — Storefront
+- [ ] M3 — Cart, checkout, payment
+- [ ] M4 — Fulfilment & money
+- [ ] M5 — Dashboards, notifications, polish
+- [ ] M6 — Hardening & launch
+
+## 7. Original open questions
 
 1. **Payment gateway:** Is Razorpay OK, or do you prefer Cashfree, PayU or another? Who owns the merchant account (KYC takes time, so start early)?
 2. **Hosting details:** Which provider? Is SSH available, which PHP version, can it run cron every minute, and is MySQL 8 or MariaDB available? This decides the deploy method.
