@@ -63,3 +63,78 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: root
         run: php artisan test
+
+  # Deploys main to the server after the tests pass. Does nothing until the
+  # DEPLOY_* secrets are set (see docs/DEPLOYMENT.md, "Automatic deploys").
+  deploy:
+    name: Deploy
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+
+    env:
+      SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+      SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT || '22' }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      PHP_BIN: ${{ vars.DEPLOY_PHP_BIN || 'php' }}
+      COMPOSER_BIN: ${{ vars.DEPLOY_COMPOSER_BIN || 'composer' }}
+
+    steps:
+      - name: Check deploy settings
+        id: config
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ] || [ -z "$DEPLOY_PATH" ]; then
+            echo "::notice::DEPLOY_SSH_HOST, DEPLOY_SSH_USER or DEPLOY_PATH is not set, so nothing was deployed."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.enabled == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build front-end assets
+        if: steps.config.outputs.enabled == 'true'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Set up SSH
+        if: steps.config.outputs.enabled == 'true'
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_SSH_KNOWN_HOSTS is not set; trusting the server key found by ssh-keyscan."
+            ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > ~/.ssh/known_hosts
+          fi
+          printf 'Host deploy-target\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n' \
+            "$SSH_HOST" "$SSH_USER" "$SSH_PORT" > ~/.ssh/config
+
+      - name: Upload front-end assets
+        if: steps.config.outputs.enabled == 'true'
+        # Extracted next to the live folder, then swapped in, so pages never see half an upload.
+        run: |
+          tar -C public -czf - build | ssh deploy-target \
+            "cd '$DEPLOY_PATH/public' && rm -rf build.new && mkdir build.new && tar -xzf - -C build.new --strip-components=1 && rm -rf build.old && { [ ! -d build ] || mv build build.old; } && mv build.new build && rm -rf build.old"
+
+      - name: Pull code and run deploy script
+        if: steps.config.outputs.enabled == 'true'
+        run: |
+          ssh deploy-target "cd '$DEPLOY_PATH' && git fetch --quiet origin main && git merge --ff-only FETCH_HEAD && PHP_BIN='$PHP_BIN' COMPOSER_BIN='$COMPOSER_BIN' bash scripts/deploy.sh"
