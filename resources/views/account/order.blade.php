@@ -28,7 +28,10 @@
                 <section class="rounded-lg border border-stone-200 bg-white">
                     <header class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-3 text-sm">
                         <span>{{ __('Parcel :number from', ['number' => $subOrder->number]) }} <span class="font-medium">{{ $subOrder->store->name }}</span></span>
-                        <x-badge :status="$subOrder->status" />
+                        <span class="flex items-center gap-3">
+                            <a href="{{ route('messages.compose', [$subOrder->store, 'sub_order_id' => $subOrder->id]) }}" class="text-xs hover:underline">{{ __('Message seller') }}</a>
+                            <x-badge :status="$subOrder->status" />
+                        </span>
                     </header>
                     <ul class="divide-y divide-stone-100 text-sm">
                         @foreach ($subOrder->items as $item)

@@ -66,6 +66,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/ledger', [Admin\LedgerController::class, 'index'])->name('ledger.index');
     Route::post('/ledger/{store}', [Admin\LedgerController::class, 'payout'])->name('ledger.payout');
 
+    Route::get('/messages', [Admin\MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{conversation}', [Admin\MessageController::class, 'show'])->name('messages.show');
+
     Route::get('/activity', Admin\ActivityController::class)->name('activity');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');

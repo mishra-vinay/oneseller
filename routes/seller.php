@@ -44,6 +44,10 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
         Route::post('/returns/{return}/receive', [Seller\ReturnController::class, 'receive'])->name('returns.receive');
         Route::post('/returns/{return}/replace', [Seller\ReturnController::class, 'replace'])->name('returns.replace');
 
+        Route::get('/messages', [Seller\MessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/{conversation}', [Seller\MessageController::class, 'show'])->whereNumber('conversation')->name('messages.show');
+        Route::post('/messages/{conversation}', [Seller\MessageController::class, 'reply'])->whereNumber('conversation')->middleware('throttle:30,1')->name('messages.reply');
+
         Route::get('/customers', Seller\CustomerController::class)->name('customers');
         Route::get('/reviews', [Seller\ReviewController::class, 'index'])->name('reviews');
         Route::post('/reviews/{review}/reply', [Seller\ReviewController::class, 'reply'])->whereNumber('review')->name('reviews.reply');

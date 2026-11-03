@@ -122,6 +122,22 @@
         </section>
     @endif
 
+    @if (! auth()->check() || auth()->user()->role === \App\Enums\Role::Buyer)
+        <details class="mt-8 max-w-3xl rounded-lg border border-stone-200 bg-white p-4" @if ($errors->has('body')) open @endif>
+            <summary class="cursor-pointer text-sm font-medium">{{ __('Ask :store a question', ['store' => $product->store->name]) }}</summary>
+            @auth
+                <form method="POST" action="{{ route('messages.start', $product->store) }}" class="mt-3 space-y-2">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <x-form.textarea name="body" :label="__('Your question')" rows="3" required maxlength="2000" />
+                    <x-form.button>{{ __('Send') }}</x-form.button>
+                </form>
+            @else
+                <p class="mt-3 text-sm"><a href="{{ route('login') }}" class="font-medium underline">{{ __('Log in') }}</a> {{ __('to message the seller.') }}</p>
+            @endauth
+        </details>
+    @endif
+
     <section id="reviews" class="mt-10 max-w-3xl">
         <h2 class="mb-3 text-lg font-semibold">{{ __('Reviews') }}</h2>
         @if ($product->rating_count > 0)
