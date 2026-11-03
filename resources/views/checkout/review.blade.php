@@ -33,7 +33,7 @@
                     <legend class="mb-2 text-sm font-medium">{{ __('Payment') }}</legend>
                     @forelse ($methods as $method)
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="radio" name="payment_method" value="{{ $method->value }}" @checked($loop->first) required> {{ $method->label() }}
+                            <input type="radio" name="payment_method" value="{{ $method->value }}" @checked($loop->first) required> {{ __($method->label()) }}
                         </label>
                     @empty
                         <p class="text-sm text-red-700">{{ __('Payments are not available right now. Please try again later.') }}</p>

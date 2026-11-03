@@ -48,7 +48,7 @@
             @endif
             <div class="mt-3 flex items-baseline gap-3">
                 @if ($product->hasPriceRange()) <span class="text-sm text-stone-500">{{ __('From') }}</span> @endif
-                <x-money :amount="$product->defaultVariant->price" class="text-2xl font-semibold" />
+                <x-price :amount="$product->defaultVariant->price" class="text-2xl font-semibold" />
                 @php $shown = $product->defaultVariant; @endphp
                 @if ($shown->compare_at_price && $shown->compare_at_price > $shown->price)
                     <s class="text-stone-500"><x-money :amount="$shown->compare_at_price" /></s>
@@ -73,7 +73,7 @@
                                     <label @class(['cursor-pointer rounded-md border px-3 py-2 text-sm has-[:checked]:border-stone-900 has-[:checked]:bg-stone-900 has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-stone-900 has-[:focus-visible]:ring-offset-2', 'border-stone-300 bg-white' => $option->stock > 0, 'cursor-not-allowed border-dashed border-stone-300 text-stone-400' => $option->stock < 1])>
                                         <input type="radio" name="variant_id" value="{{ $option->id }}" class="sr-only" @checked($option->is($variant)) @disabled($option->stock < 1)>
                                         {{ $option->label() }}
-                                        @if ($product->hasPriceRange()) · <x-money :amount="$option->price" /> @endif
+                                        @if ($product->hasPriceRange()) · <x-price :amount="$option->price" /> @endif
                                         @if ($option->stock < 1) · {{ __('sold out') }} @elseif ($option->stock <= \App\Models\ProductVariant::LOW_STOCK_THRESHOLD) · {{ __(':n left', ['n' => $option->stock]) }} @endif
                                     </label>
                                 @endforeach

@@ -35,6 +35,7 @@ class SettingsTest extends TestCase
             'order_notification_email' => '',
             'auto_approve_products' => '1',
             'return_window_days' => '10',
+            'currency_rates' => "USD=0.012\nAED=0.044",
             // cod_enabled and auto_approve_sellers left unchecked
         ])->assertSessionHasNoErrors();
 

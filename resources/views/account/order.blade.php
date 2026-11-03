@@ -10,7 +10,7 @@
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h2 class="text-2xl font-semibold">{{ $order->number }}</h2>
-            <p class="text-sm text-stone-500">{{ __('Placed :date', ['date' => ($order->placed_at ?? $order->created_at)->format('d M Y, g:i A')]) }} · {{ $order->payment_method->label() }} · {{ $order->payment_status->label() }}</p>
+            <p class="text-sm text-stone-500">{{ __('Placed :date', ['date' => ($order->placed_at ?? $order->created_at)->format('d M Y, g:i A')]) }} · {{ __($order->payment_method->label()) }} · {{ __($order->payment_status->label()) }}</p>
         </div>
         <x-badge :status="$order->status" class="text-sm" />
     </div>

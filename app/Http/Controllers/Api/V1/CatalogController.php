@@ -14,6 +14,7 @@ use App\Models\Store;
 use App\Services\Catalog;
 use App\Services\CheckoutOptions;
 use App\Services\Payments\RazorpayGateway;
+use App\Support\Locale;
 use App\Support\Settings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,9 @@ class CatalogController extends Controller
             'site_name' => $settings->get('site_name'),
             'currency' => 'INR',
             'money_unit' => 'paise',
+            // Display-only: multiply rupees by the rate. Payment is always in INR.
+            'currency_rates' => Locale::rates(),
+            'languages' => array_keys(Locale::LANGUAGES),
             'payment_methods' => array_map(fn ($m) => $m->value, $options->paymentMethods()),
             'razorpay_key_id' => $razorpay->isConfigured() ? $razorpay->keyId() : null,
             'return_window_days' => $settings->get('return_window_days'),

@@ -6,6 +6,9 @@
         <div class="flex justify-between text-emerald-700"><dt>{{ $coupon ? __('Coupon :code', ['code' => $coupon]) : __('Discount') }}</dt><dd>−<x-money :amount="$discount" /></dd></div>
     @endif
     <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-semibold"><dt>{{ __('Total') }}</dt><dd><x-money :amount="$total" /></dd></div>
+    @if ($approx = \App\Support\Locale::converted((int) $total))
+        <div class="text-right text-xs text-stone-500">{{ $approx }}</div>
+    @endif
     @if ($refunded > 0)
         <div class="flex justify-between text-violet-800"><dt>{{ __('Refunded') }}</dt><dd>−<x-money :amount="$refunded" /></dd></div>
     @endif

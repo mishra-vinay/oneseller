@@ -19,6 +19,9 @@
             <x-form.checkbox name="cod_enabled" :label="__('Allow Cash on Delivery')" :checked="$settings['cod_enabled']" />
             <x-form.checkbox name="route_settlement_enabled" :label="__('Pay sellers automatically with Razorpay Route')" :checked="$settings['route_settlement_enabled']"
                 :hint="__('Online payments are split to sellers with a linked account, held until delivery, and reversed if cancelled. Needs Route enabled on your Razorpay account.')" />
+            <x-form.textarea name="currency_rates" :label="__('Display currencies')" rows="4"
+                :value="collect($settings['currency_rates'] ?? [])->map(fn ($rate, $code) => $code.'='.$rate)->implode(PHP_EOL)"
+                :hint="__('One per line: code=units per ₹1, e.g. USD=0.012. Buyers can view prices in these; payment is always in rupees.')" />
             <x-form.input name="return_window_days" type="number" min="0" max="90" :label="__('Return window (days after delivery)')" :value="$settings['return_window_days']" required :hint="__('0 turns returns off.')" />
         </section>
 

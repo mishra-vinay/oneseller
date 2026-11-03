@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureStoreApproved;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,7 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [EnsureAccountActive::class, SecurityHeaders::class]);
+        $middleware->web(append: [SetLocale::class, EnsureAccountActive::class, SecurityHeaders::class]);
+        // Language and currency choices are plain values, not secrets; keep them readable.
+        $middleware->encryptCookies(except: ['locale', 'currency']);
         // Razorpay signs webhooks itself; they cannot carry a CSRF token.
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
         $middleware->alias([
@@ -35,7 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureAccountActive::class,
             'auth.optional' => AuthenticateIfToken::class,
         ]);
-        $middleware->api(prepend: [ForceJsonResponse::class]);
+        $middleware->api(prepend: [ForceJsonResponse::class, SetLocale::class]);
         $middleware->throttleApi();
 
         $middleware->redirectGuestsTo(fn (Request $request) => route(Role::forPath($request->path())->loginRoute()));

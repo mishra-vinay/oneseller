@@ -14,7 +14,7 @@
         @endif
         <div class="mt-2 flex items-baseline gap-2 text-sm">
             @if ($product->hasPriceRange()) <span class="text-xs text-stone-500">{{ __('From') }}</span> @endif
-            <x-money :amount="$variant->price" class="font-semibold" />
+            <x-price :amount="$variant->price" class="font-semibold" />
             @if ($variant->compare_at_price && $variant->compare_at_price > $variant->price)
                 <s class="text-xs text-stone-500"><x-money :amount="$variant->compare_at_price" /></s>
             @endif

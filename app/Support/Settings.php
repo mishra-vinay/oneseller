@@ -32,6 +32,8 @@ class Settings
         'auto_approve_products' => false,
         'return_window_days' => 7,
         'route_settlement_enabled' => false,
+        // Display-only conversion rates: units of each currency per 1 INR.
+        'currency_rates' => ['USD' => 0.012, 'EUR' => 0.011, 'GBP' => 0.0094, 'AED' => 0.044],
     ];
 
     public function get(string $key): mixed

@@ -51,7 +51,7 @@
                                             </form>
                                         </div>
                                     </div>
-                                    <x-money :amount="$item->line_total" class="font-medium" />
+                                    <x-price :amount="$item->line_total" class="font-medium" />
                                 </li>
                             @endforeach
                         </ul>
@@ -82,6 +82,9 @@
                         @error('code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     @endif
                 </div>
+                @if (\App\Support\Locale::currency() !== 'INR')
+                    <p class="mt-3 text-xs text-stone-500">{{ __('You pay in Indian Rupees (₹). Other currencies are shown for reference only.') }}</p>
+                @endif
                 @if ($cart['has_problems'])
                     <p class="mt-4 text-sm text-red-700">{{ __('Remove or update the highlighted items to continue.') }}</p>
                 @else

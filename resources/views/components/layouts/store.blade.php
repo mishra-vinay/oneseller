@@ -65,6 +65,18 @@
     <footer class="border-t border-stone-200 bg-white">
         <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm text-stone-600">
             <span>© {{ now()->year }} {{ $siteName }}</span>
+            <nav class="flex flex-wrap items-center gap-x-4 gap-y-1" aria-label="{{ __('Language and currency') }}">
+                <span class="flex gap-2">
+                    @foreach (\App\Support\Locale::LANGUAGES as $code => $name)
+                        <a href="{{ route('preferences.language', $code) }}" lang="{{ $code }}" @class(['hover:underline', 'font-semibold text-stone-900' => app()->getLocale() === $code])>{{ $name }}</a>
+                    @endforeach
+                </span>
+                <span class="flex gap-2">
+                    @foreach (['INR', ...array_keys(\App\Support\Locale::rates())] as $code)
+                        <a href="{{ route('preferences.currency', $code) }}" @class(['hover:underline', 'font-semibold text-stone-900' => \App\Support\Locale::currency() === $code])>{{ $code }}</a>
+                    @endforeach
+                </span>
+            </nav>
             <nav class="flex flex-wrap gap-4">
                 <a href="{{ route('seller.register') }}" class="hover:underline">{{ __('Sell with us') }}</a>
                 @if ($hasBlog) <a href="{{ route('blog') }}" class="hover:underline">{{ __('Blog') }}</a> @endif

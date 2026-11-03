@@ -17,6 +17,8 @@ Route::get('/search', Storefront\SearchController::class)->name('search');
 Route::get('/product/{store}/{product}', Storefront\ProductPageController::class)->name('product.show');
 Route::get('/store/{store}', Storefront\StorePageController::class)->name('store.show');
 Route::get('/sitemap.xml', Storefront\SitemapController::class)->name('sitemap');
+Route::get('/language/{code}', [Storefront\PreferenceController::class, 'language'])->name('preferences.language');
+Route::get('/currency/{code}', [Storefront\PreferenceController::class, 'currency'])->name('preferences.currency');
 Route::get('/p/{slug}', [Storefront\PageController::class, 'show'])->name('pages.show');
 Route::get('/blog', [Storefront\PageController::class, 'blog'])->name('blog');
 Route::get('/blog/{slug}', [Storefront\PageController::class, 'post'])->name('blog.show');

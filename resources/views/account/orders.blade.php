@@ -14,7 +14,7 @@
             </div>
             <div class="mt-2 flex flex-wrap gap-2 text-xs text-stone-600">
                 @foreach ($order->subOrders as $subOrder)
-                    <span class="rounded bg-stone-100 px-2 py-1">{{ $subOrder->store->name }}: {{ $subOrder->status->label() }}</span>
+                    <span class="rounded bg-stone-100 px-2 py-1">{{ $subOrder->store->name }}: {{ __($subOrder->status->label()) }}</span>
                 @endforeach
             </div>
         </a>
