@@ -2,10 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CouponType;
 use App\Enums\ProductStatus;
 use App\Enums\Role;
+use App\Enums\ShippingMode;
 use App\Enums\StoreStatus;
 use App\Models\Category;
+use App\Models\Coupon;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Store;
@@ -23,6 +27,8 @@ use Illuminate\Support\Str;
  *   meera@example.com            /seller/login   (Meera Handlooms, approved)
  *   kiran@example.com            /seller/login   (Kiran Home, pending approval)
  *   buyer@example.com            /login
+ *
+ * Also: coupon WELCOME10, an About page and a blog post, and a product with size/colour variants.
  */
 class DemoSeeder extends Seeder
 {
@@ -52,6 +58,24 @@ class DemoSeeder extends Seeder
         $this->product($meera, $categories['home-textiles'], 'Block Print Cushion Covers (Set of 5)', 79900, null, 4, '#9333ea');
 
         $this->product($kiran, $categories['home-textiles'], 'Jute Floor Rug', 99900, null, 10, '#a16207', ProductStatus::Pending);
+
+        // Meera charges her own flat shipping, free above ₹1,500.
+        $meera->forceFill(['shipping_mode' => ShippingMode::Flat, 'shipping_flat_paise' => 4000, 'shipping_free_above_paise' => 150000])->save();
+
+        Coupon::updateOrCreate(['code' => 'WELCOME10'], [
+            'description' => 'Demo: 10% off, up to ₹300',
+            'type' => CouponType::Percent, 'value' => 1000, 'max_discount_paise' => 30000,
+            'min_order_paise' => 50000, 'per_user_limit' => 1, 'is_active' => true,
+        ]);
+
+        Page::updateOrCreate(['slug' => 'about-us'], [
+            'type' => Page::TYPE_PAGE, 'title' => 'About us', 'show_in_footer' => true, 'is_published' => true, 'published_at' => now(),
+            'body' => "## Many sellers, one cart\n\nOneSeller brings independent Indian stores together. You pay once; each seller ships their own parcel.\n\n- Genuine sellers, approved by our team\n- Track every parcel separately\n- Easy returns within 7 days of delivery",
+        ]);
+        Page::updateOrCreate(['slug' => 'diwali-gift-guide'], [
+            'type' => Page::TYPE_POST, 'title' => 'Diwali gift guide', 'excerpt' => 'Handloom, lamps and gadgets from our sellers.', 'is_published' => true, 'published_at' => now()->subDay(),
+            'body' => "Looking for gifts? Try a **Kanchipuram silk saree** from Meera Handlooms, or a JBL speaker from Ravi Electronics.\n\nUse code `WELCOME10` for 10% off your first order.",
+        ]);
 
         $this->withOptions(
             $this->product($meera, $categories['sarees'], 'Handloom Cotton Kurta', 89900, 119900, 0, '#0369a1'),

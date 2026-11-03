@@ -5,6 +5,7 @@ A multi-vendor marketplace: many independent sellers list products in one storef
 - Functional scope: [`OneSeller-MVP-Functional-Scope.docx`](OneSeller-MVP-Functional-Scope.docx)
 - Build plan, decisions and milestones: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md)
 - Deploying to shared hosting: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+- Mobile API for the Android/iOS apps: [`docs/API.md`](docs/API.md)
 
 Stack: PHP 8.3+, Laravel 13, MySQL 8 (SQLite locally), Blade + Tailwind CSS. Payments: Razorpay + Cash on Delivery.
 
@@ -21,7 +22,11 @@ php artisan storage:link
 php artisan serve
 ```
 
-Demo accounts (password `password1`): `admin@example.com`, sellers `ravi@example.com` and `meera@example.com` (approved) and `kiran@example.com` (pending), buyer `buyer@example.com`. For an empty database, create an admin with `php artisan oneseller:create-admin`.
+Demo accounts (password `password1`): `admin@example.com`, sellers `ravi@example.com` and `meera@example.com` (approved) and `kiran@example.com` (pending), buyer `buyer@example.com`. The demo data also includes:
+- coupon `WELCOME10`
+- a size/colour product (Handloom Cotton Kurta)
+- Meera's own shipping rules
+- an About page and a blog post For an empty database, create an admin with `php artisan oneseller:create-admin`.
 
 Online payment appears at checkout only when the `RAZORPAY_*` keys are set in `.env` (use Razorpay test keys locally). Without them, checkout offers Cash on Delivery.
 
@@ -42,7 +47,7 @@ php artisan test
 vendor/bin/pint --test
 ```
 
-CI runs both on every pull request, with the tests against SQLite and MySQL.
+CI runs both on every pull request, with the tests against SQLite and MySQL. API tests live in `tests/Feature/Api`.
 
 ## Conventions
 

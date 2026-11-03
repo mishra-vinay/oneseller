@@ -46,7 +46,7 @@
             @if ($product->rating_count > 0)
                 <a href="#reviews" class="mt-1 inline-block hover:underline"><x-stars :rating="$product->rating_avg" :count="$product->rating_count" /></a>
             @endif
-            <div class="mt-3 flex items-baseline gap-3">
+            <div class="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 @if ($product->hasPriceRange()) <span class="text-sm text-stone-500">{{ __('From') }}</span> @endif
                 <x-price :amount="$product->defaultVariant->price" class="text-2xl font-semibold" />
                 @php $shown = $product->defaultVariant; @endphp
@@ -129,7 +129,7 @@
                 <form method="POST" action="{{ route('messages.start', $product->store) }}" class="mt-3 space-y-2">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    <x-form.textarea name="body" :label="__('Your question')" rows="3" required maxlength="2000" />
+                    <x-form.textarea name="body" id="question-body" :label="__('Your question')" rows="3" required maxlength="2000" />
                     <x-form.button>{{ __('Send') }}</x-form.button>
                 </form>
             @else
@@ -156,8 +156,8 @@
                     </div>
                     @error('rating') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </fieldset>
-                <x-form.input name="title" :label="__('Title (optional)')" :value="$myReview?->title" maxlength="120" />
-                <x-form.textarea name="body" :label="__('Your review (optional)')" :value="$myReview?->body" rows="3" />
+                <x-form.input name="title" id="review-title" :label="__('Title (optional)')" :value="$myReview?->title" maxlength="120" />
+                <x-form.textarea name="body" id="review-body" :label="__('Your review (optional)')" :value="$myReview?->body" rows="3" />
                 <x-form.button>{{ $myReview ? __('Update review') : __('Post review') }}</x-form.button>
             </form>
         @endif

@@ -165,6 +165,20 @@ Each milestone ends deployable to staging, with tests.
 - [x] **M4 — Fulfilment & money**: seller accept / ship (courier + tracking) / deliver / cancel; buyer order history with per-seller status and tracking; admin order view, cancel a portion, record refunds; append-only ledger credited on delivery (with COD handling), seller earnings statement, admin payouts and adjustments.
 - [x] **M5 — Dashboards, notifications, polish**: seller and admin dashboards (7-day chart), inventory table, customers page (no emails), admin buyers page with deactivate, activity feed, every email in the notification matrix, in-panel notifications, daily low-stock digest.
 - [x] **M6 — Hardening & launch prep**: security headers, rate-limited login/reset, upload validation, webhook signatures, terms/privacy/refund page templates, demo seeder, browser run-through of the full buyer → seller → admin flow. **Remaining before go-live (needs you):** hosting details, Razorpay live keys, email provider, final subdomain/branding, legal review of the policy pages, GST/TCS check.
+- [x] **Phase 2 — Mobile API and the "Not in the MVP" list** (apps themselves not included):
+  - **Mobile API** `/api/v1` (Sanctum tokens) for buyers and sellers, documented in `docs/API.md`.
+  - **Push notifications** via Firebase Cloud Messaging.
+  - **Product variants** (size/colour): one variant per combination, each with its own price, stock and SKU.
+  - **Per-seller shipping rules:** flat rate or weight rate card, with each store's own free threshold.
+  - **Coupons:** platform-funded, with percent/fixed, caps, limits, dates and optional store restriction.
+  - **Wishlist; reviews and ratings** (verified buyers, seller replies, admin moderation).
+  - **Returns and replacements:** window setting, seller workflow, admin refunds with ledger reversal.
+  - **Buyer–seller messaging.**
+  - **Abandoned-cart reminders.**
+  - **Content pages and blog** (Markdown).
+  - **Automatic split settlement** with Razorpay Route (held until delivery).
+  - **Hindi language and display currencies.**
+  - **Not done:** the Android/iOS apps themselves. Seller and admin panels are translated only where they share the storefront's text. Laravel's validation messages stay in English, since there's no official Hindi set.
 
 ## 7. Original open questions
 

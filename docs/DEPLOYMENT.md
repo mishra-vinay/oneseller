@@ -59,6 +59,9 @@ MAIL_FROM_NAME="OneSeller"
 RAZORPAY_KEY_ID=rzp_live_...
 RAZORPAY_KEY_SECRET=...
 RAZORPAY_WEBHOOK_SECRET=...
+
+# Push notifications for the mobile apps (optional)
+FCM_CREDENTIALS=/home/youruser/firebase-service-account.json
 ```
 
 Set up SPF, DKIM and DMARC DNS records for the sending domain as the email provider instructs, so order emails reach the inbox.
@@ -72,13 +75,26 @@ Defined in `routes/console.php`:
 | `queue:work --stop-when-empty` | every minute | Sends queued emails. Shared hosting cannot keep a worker running. |
 | `oneseller:expire-unpaid-orders` | every 5 minutes | Cancels online orders not paid within 30 minutes and returns their stock. |
 | `oneseller:low-stock-digest` | daily 09:00 IST | Emails each seller their low-stock products. |
+| `oneseller:cart-reminders` | hourly | Emails buyers once about carts left for over 24 hours. |
 
 ## Razorpay
 
 1. Complete Razorpay KYC and switch the dashboard to Live mode.
 2. Copy the Key ID and Key Secret into `.env`.
 3. Webhooks: add `https://shop.talkforweb.in/webhooks/razorpay` with events `payment.captured` and `order.paid`, set a secret, and put it in `RAZORPAY_WEBHOOK_SECRET`. The webhook confirms payments even if the buyer closes the browser before returning.
-4. Refunds are issued from the Razorpay dashboard; then press "Mark refunded" on the order in `/admin/orders`.
+4. Refunds are issued from the Razorpay dashboard. Then press "Mark refunded" on the order in `/admin/orders`, or on the return in `/admin/returns`.
+5. **Automatic payouts (optional):**
+   - Enable Route on the Razorpay account.
+   - Create a linked account for each seller and enter its `acc_…` ID on the seller's admin page.
+   - Tick "Pay sellers automatically with Razorpay Route" in Settings.
+
+   Online payments are then split to those sellers, held until delivery and reversed if cancelled. Everyone else stays on manual payouts from the ledger.
+
+## Push notifications (mobile apps)
+
+1. In the Firebase console, open the apps' project, then **Project settings → Service accounts → Generate new private key**.
+2. Upload the JSON file outside the web root and set `FCM_CREDENTIALS` to its path. Alternatively, put the JSON (or base64 of it) in `FCM_CREDENTIALS_JSON`.
+3. Run `php artisan config:cache`. The apps register their device tokens through `POST /api/v1/devices` (see `docs/API.md`).
 
 ## Backups and monitoring
 

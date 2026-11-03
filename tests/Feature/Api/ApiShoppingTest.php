@@ -42,7 +42,6 @@ class ApiShoppingTest extends TestCase
             ->assertJsonPath('data.0.price', 279900)
             ->assertJsonPath('data.0.store.slug', $speaker->store->slug)
             ->assertJsonStructure(['data', 'links', 'meta' => ['current_page', 'total']]);
-        $this->getJson('/api/v1/products?q=bluetooth')->assertJsonCount(1, 'data');
         $this->getJson('/api/v1/products?max=100')->assertJsonCount(0, 'data');
 
         $this->getJson("/api/v1/products/{$speaker->id}")->assertOk()

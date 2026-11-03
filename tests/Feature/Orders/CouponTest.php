@@ -97,7 +97,7 @@ class CouponTest extends TestCase
         $a = Product::factory()->priced(150000)->create(['store_id' => $alpha->id]);
         $b = Product::factory()->priced(50000)->create(['store_id' => $beta->id]);
         $buyer = $this->buyerWithAddress();
-        $this->coupon();
+        $coupon = $this->coupon();
 
         $this->actingAs($buyer)->post('/cart/items', ['variant_id' => $a->defaultVariant->id, 'quantity' => 1]);
         $this->post('/cart/items', ['variant_id' => $b->defaultVariant->id, 'quantity' => 1]);
@@ -115,7 +115,7 @@ class CouponTest extends TestCase
         $this->assertSame(200000 + 5000 - 20000, $order->grand_total);
         $this->assertSame([15000, 5000], $order->subOrders->pluck('discount')->all());
         $this->assertSame([135000, 50000], [$order->subOrders[0]->net_payout, $order->subOrders[1]->net_payout], 'payout ignores the platform-funded discount');
-        $this->assertDatabaseHas('coupon_redemptions', ['coupon_id' => 1, 'order_id' => $order->id, 'discount' => 20000]);
+        $this->assertDatabaseHas('coupon_redemptions', ['coupon_id' => $coupon->id, 'order_id' => $order->id, 'discount' => 20000]);
         $this->assertNull(session('cart.coupon'), 'cleared after the order');
 
         $this->get("/order/{$order->number}")->assertSee('Coupon SAVE10');

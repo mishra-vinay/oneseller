@@ -53,7 +53,11 @@ class WishlistAndReviewTest extends TestCase
         $this->assertSame(0, Review::count());
 
         $buyer = $this->deliveredOrderFor($product);
-        $this->actingAs($buyer)->get($product->url())->assertSee('Rate this product');
+        $page = $this->actingAs($buyer)->get($product->url())->assertSee('Rate this product');
+        // The review form and the "ask the seller" form must not share field ids.
+        $this->assertSame(1, substr_count($page->getContent(), 'id="review-body"'));
+        $this->assertSame(1, substr_count($page->getContent(), 'id="question-body"'));
+        $this->assertSame(0, substr_count($page->getContent(), 'id="body"'));
 
         $this->post($url, ['rating' => 4, 'title' => 'Good', 'body' => 'Works well'])->assertRedirect($product->url().'#reviews');
         $this->post($url, ['rating' => 2, 'title' => 'Changed my mind']);

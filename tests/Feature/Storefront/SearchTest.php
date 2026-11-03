@@ -28,5 +28,8 @@ class SearchTest extends TestCase
         $this->get('/search?q=bluetooth+speaker')->assertSee('Bluetooth Speaker Mini')->assertDontSee('Desk Lamp');
         $this->get('/search?q=blue')->assertSee('Bluetooth Speaker Mini');
         $this->get('/search')->assertOk()->assertSee('Cotton Saree');
+
+        // The API runs the same search.
+        $this->getJson('/api/v1/products?q=bluetooth+speaker')->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.name', 'Bluetooth Speaker Mini');
     }
 }

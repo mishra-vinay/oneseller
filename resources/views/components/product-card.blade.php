@@ -12,7 +12,7 @@
         @if ($product->rating_count > 0)
             <x-stars :rating="$product->rating_avg" :count="$product->rating_count" size="text-xs" class="mt-1" />
         @endif
-        <div class="mt-2 flex items-baseline gap-2 text-sm">
+        <div class="mt-2 flex flex-wrap items-baseline gap-x-2 text-sm">
             @if ($product->hasPriceRange()) <span class="text-xs text-stone-500">{{ __('From') }}</span> @endif
             <x-price :amount="$variant->price" class="font-semibold" />
             @if ($variant->compare_at_price && $variant->compare_at_price > $variant->price)
