@@ -10,3 +10,5 @@ Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->every
 Schedule::command('oneseller:expire-unpaid-orders')->everyFiveMinutes()->withoutOverlapping();
 
 Schedule::command('oneseller:low-stock-digest')->dailyAt('09:00');
+
+Schedule::command('oneseller:cart-reminders')->hourly()->withoutOverlapping();

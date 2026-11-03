@@ -8,6 +8,7 @@
         'accepted', 'shipped', 'received' => 'bg-sky-100 text-sky-800',
         'rejected', 'cancelled', 'suspended', 'failed', 'deactivated', 'disabled', 'expired' => 'bg-red-100 text-red-800',
         'refunded', 'partially_refunded' => 'bg-violet-100 text-violet-800',
+        'footer' => 'bg-sky-100 text-sky-800',
         default => 'bg-stone-200 text-stone-700',
     };
 @endphp

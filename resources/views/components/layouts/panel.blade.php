@@ -4,7 +4,7 @@
         ? [
             ['admin.dashboard', __('Dashboard')], ['admin.sellers.index', __('Sellers')], ['admin.buyers.index', __('Buyers')],
             ['admin.products.index', __('Products')], ['admin.reviews.index', __('Reviews')], ['admin.categories.index', __('Categories')], ['admin.orders.index', __('Orders')], ['admin.returns.index', __('Returns')], ['admin.coupons.index', __('Coupons')],
-            ['admin.ledger.index', __('Seller earnings')], ['admin.messages.index', __('Messages')], ['admin.activity', __('Activity')], ['admin.settings', __('Settings')],
+            ['admin.ledger.index', __('Seller earnings')], ['admin.messages.index', __('Messages')], ['admin.pages.index', __('Pages & blog')], ['admin.activity', __('Activity')], ['admin.settings', __('Settings')],
         ]
         : [
             ['seller.dashboard', __('Dashboard')], ['seller.products.index', __('Products')], ['seller.inventory', __('Inventory')],

@@ -69,6 +69,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/messages', [Admin\MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{conversation}', [Admin\MessageController::class, 'show'])->name('messages.show');
 
+    Route::get('/pages', [Admin\PageController::class, 'index'])->name('pages.index');
+    Route::get('/pages/create', [Admin\PageController::class, 'create'])->name('pages.create');
+    Route::post('/pages', [Admin\PageController::class, 'store'])->name('pages.store');
+    Route::get('/pages/{page}/edit', [Admin\PageController::class, 'edit'])->name('pages.edit');
+    Route::put('/pages/{page}', [Admin\PageController::class, 'update'])->name('pages.update');
+    Route::delete('/pages/{page}', [Admin\PageController::class, 'destroy'])->name('pages.destroy');
+
     Route::get('/activity', Admin\ActivityController::class)->name('activity');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');

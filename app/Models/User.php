@@ -43,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'role' => Role::class,
             'status' => AccountStatus::class,
+            'cart_reminders' => 'boolean',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];

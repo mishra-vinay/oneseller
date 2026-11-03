@@ -67,6 +67,10 @@
             <span>© {{ now()->year }} {{ $siteName }}</span>
             <nav class="flex flex-wrap gap-4">
                 <a href="{{ route('seller.register') }}" class="hover:underline">{{ __('Sell with us') }}</a>
+                @if ($hasBlog) <a href="{{ route('blog') }}" class="hover:underline">{{ __('Blog') }}</a> @endif
+                @foreach ($footerPages as $footerPage)
+                    <a href="{{ $footerPage->url() }}" class="hover:underline">{{ $footerPage->title }}</a>
+                @endforeach
                 <a href="{{ route('pages.terms') }}" class="hover:underline">{{ __('Terms') }}</a>
                 <a href="{{ route('pages.privacy') }}" class="hover:underline">{{ __('Privacy') }}</a>
                 <a href="{{ route('pages.refund') }}" class="hover:underline">{{ __('Refunds & cancellations') }}</a>

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::name('api.')->group(function () {
     Route::get('/config', [V1\CatalogController::class, 'config'])->name('config');
+    Route::get('/pages/{slug}', [V1\CatalogController::class, 'page'])->name('pages.show');
+    Route::get('/blog', [V1\CatalogController::class, 'blog'])->name('blog');
 
     Route::post('/auth/register', [V1\AuthController::class, 'register'])->middleware('throttle:10,1')->name('register');
     Route::post('/auth/login', [V1\AuthController::class, 'login'])->middleware('throttle:20,1')->name('login');

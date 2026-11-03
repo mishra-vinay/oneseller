@@ -8,6 +8,7 @@ use App\Http\Resources\ProductResource;
 use App\Http\Resources\ReviewResource;
 use App\Http\Resources\StoreResource;
 use App\Models\Category;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\Store;
 use App\Services\Catalog;
@@ -36,6 +37,42 @@ class CatalogController extends Controller
             'return_window_days' => $settings->get('return_window_days'),
             'support_email' => $settings->get('support_email'),
         ]);
+    }
+
+    /**
+     * Content pages and blog posts; body is rendered, safe HTML.
+     */
+    public function page(string $slug): JsonResponse
+    {
+        $page = Page::published()->where('slug', $slug)->firstOrFail();
+
+        return response()->json(['data' => $this->pageData($page) + ['html' => (string) $page->html()]]);
+    }
+
+    public function blog(): JsonResponse
+    {
+        $posts = Page::published()->where('type', Page::TYPE_POST)->latest('published_at')->paginate(12);
+
+        return response()->json([
+            'data' => $posts->getCollection()->map(fn (Page $p) => $this->pageData($p)),
+            'meta' => ['current_page' => $posts->currentPage(), 'last_page' => $posts->lastPage(), 'total' => $posts->total()],
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function pageData(Page $page): array
+    {
+        return [
+            'type' => $page->type,
+            'title' => $page->title,
+            'slug' => $page->slug,
+            'excerpt' => $page->excerpt,
+            'cover_url' => $page->coverUrl(),
+            'published_at' => $page->published_at?->toIso8601String(),
+            'url' => $page->url(),
+        ];
     }
 
     public function categories(): AnonymousResourceCollection

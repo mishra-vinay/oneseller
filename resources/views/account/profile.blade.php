@@ -18,6 +18,7 @@
                 <x-form.input name="name" :label="__('Full name')" :value="$user->name" required />
                 <x-form.input name="email" type="email" :label="__('Email')" :value="$user->email" required :hint="__('Changing your email means verifying it again.')" />
                 <x-form.input name="phone" type="tel" :label="__('Mobile number')" :value="$user->phone" required inputmode="numeric" maxlength="10" />
+                <x-form.checkbox name="cart_reminders" :label="__('Email me about items left in my cart')" :checked="$user->cart_reminders" />
                 <x-form.button>{{ __('Save profile') }}</x-form.button>
             </form>
         </section>

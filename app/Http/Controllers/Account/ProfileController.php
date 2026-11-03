@@ -29,6 +29,7 @@ class ProfileController extends Controller
         ]);
 
         $user->fill($data);
+        $user->cart_reminders = $request->boolean('cart_reminders');
         $emailChanged = $user->isDirty('email');
 
         if ($emailChanged) {
