@@ -48,6 +48,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/orders/{order}/portions/{subOrder}/cancel', [Admin\OrderController::class, 'cancelPortion'])->whereNumber('subOrder')->name('orders.cancel-portion');
     Route::post('/orders/{order}/portions/{subOrder}/refund', [Admin\OrderController::class, 'refundPortion'])->whereNumber('subOrder')->name('orders.refund-portion');
 
+    Route::get('/coupons', [Admin\CouponController::class, 'index'])->name('coupons.index');
+    Route::get('/coupons/create', [Admin\CouponController::class, 'create'])->name('coupons.create');
+    Route::post('/coupons', [Admin\CouponController::class, 'store'])->name('coupons.store');
+    Route::get('/coupons/{coupon}/edit', [Admin\CouponController::class, 'edit'])->name('coupons.edit');
+    Route::put('/coupons/{coupon}', [Admin\CouponController::class, 'update'])->name('coupons.update');
+
     Route::get('/ledger', [Admin\LedgerController::class, 'index'])->name('ledger.index');
     Route::post('/ledger/{store}', [Admin\LedgerController::class, 'payout'])->name('ledger.payout');
 

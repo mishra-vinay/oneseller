@@ -51,7 +51,7 @@
         </div>
         <aside class="space-y-4">
             <x-card :title="__('Summary')">
-                <x-order-totals :items="$order->items_total" :shipping="$order->shipping_total" :total="$order->grand_total" :refunded="$order->refunded_total" />
+                <x-order-totals :items="$order->items_total" :shipping="$order->shipping_total" :total="$order->grand_total" :refunded="$order->refunded_total" :discount="$order->discount_total" :coupon="$order->coupon_code" />
             </x-card>
             <x-card :title="__('Delivery address')">
                 @foreach ($order->shippingAddressLines() as $line)

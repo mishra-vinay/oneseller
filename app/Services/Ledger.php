@@ -35,8 +35,10 @@ class Ledger
     }
 
     /**
-     * Credits a delivered sub-order. For Cash on Delivery the seller's courier already
-     * collected the cash, so a matching debit leaves only the commission owed to the platform.
+     * Credits a delivered sub-order. Coupons are platform-funded, so the seller is credited the
+     * full sale. For Cash on Delivery the seller's courier already collected what the buyer paid
+     * (after any coupon), so that is debited: the balance is the platform's share of the
+     * difference (the coupon discount less commission).
      */
     public function creditDelivery(SubOrder $subOrder, bool $cashOnDelivery): void
     {
@@ -49,7 +51,7 @@ class Ledger
                 sprintf('Commission %s%% on %s', rtrim(rtrim(number_format($subOrder->commission_bps / 100, 2), '0'), '.'), $subOrder->number));
 
             if ($cashOnDelivery) {
-                $this->post($store, LedgerType::CodCollected, -$gross, $subOrder, "COD cash collected for {$subOrder->number}");
+                $this->post($store, LedgerType::CodCollected, -$subOrder->total(), $subOrder, "COD cash collected for {$subOrder->number}");
             }
         });
     }

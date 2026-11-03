@@ -26,6 +26,8 @@ Route::get('/cart', [Storefront\CartController::class, 'show'])->name('cart');
 Route::post('/cart/items', [Storefront\CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/items/{item}', [Storefront\CartController::class, 'update'])->whereNumber('item')->name('cart.update');
 Route::delete('/cart/items/{item}', [Storefront\CartController::class, 'remove'])->whereNumber('item')->name('cart.remove');
+Route::post('/cart/coupon', [Storefront\CartController::class, 'applyCoupon'])->middleware('throttle:20,1')->name('cart.coupon');
+Route::delete('/cart/coupon', [Storefront\CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 
 Route::post('/webhooks/razorpay', Storefront\RazorpayWebhookController::class)->name('webhooks.razorpay');
 

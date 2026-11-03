@@ -20,6 +20,7 @@ class SubOrder extends Model
             'status' => SubOrderStatus::class,
             'items_subtotal' => 'integer',
             'shipping' => 'integer',
+            'discount' => 'integer',
             'commission_bps' => 'integer',
             'commission_amount' => 'integer',
             'net_payout' => 'integer',
@@ -47,10 +48,10 @@ class SubOrder extends Model
     }
 
     /**
-     * What the buyer pays for this portion.
+     * What the buyer pays for this portion, after its share of any coupon.
      */
     public function total(): int
     {
-        return $this->items_subtotal + $this->shipping;
+        return $this->items_subtotal + $this->shipping - $this->discount;
     }
 }

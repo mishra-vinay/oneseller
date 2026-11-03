@@ -60,7 +60,28 @@
             </div>
 
             <aside class="h-fit rounded-lg border border-stone-200 bg-white p-5">
-                <x-order-totals :items="$cart['items_total']" :shipping="$cart['shipping_total']" :total="$cart['grand_total']" />
+                <x-order-totals :items="$cart['items_total']" :shipping="$cart['shipping_total']" :total="$cart['grand_total']" :discount="$cart['discount_total']" :coupon="$cart['coupon']['error'] ? null : $cart['coupon']['code']" />
+                <div class="mt-4 border-t border-stone-200 pt-4">
+                    @if ($cart['coupon']['code'] && ! $cart['coupon']['error'])
+                        <form method="POST" action="{{ route('cart.coupon.remove') }}" class="flex items-center justify-between text-sm">
+                            @csrf
+                            @method('DELETE')
+                            <span><span class="font-medium">{{ $cart['coupon']['code'] }}</span> · {{ $cart['coupon']['summary'] }}</span>
+                            <button class="text-stone-600 hover:underline">{{ __('Remove') }}</button>
+                        </form>
+                    @else
+                        @if ($cart['coupon']['error'])
+                            <p class="mb-2 text-sm text-red-700">{{ $cart['coupon']['error'] }}</p>
+                        @endif
+                        <form method="POST" action="{{ route('cart.coupon') }}" class="flex gap-2">
+                            @csrf
+                            <label for="coupon-code" class="sr-only">{{ __('Coupon code') }}</label>
+                            <input id="coupon-code" name="code" value="{{ old('code') }}" placeholder="{{ __('Coupon code') }}" class="w-full rounded-md border border-stone-300 px-3 py-2 text-sm uppercase">
+                            <button class="rounded-md border border-stone-300 px-3 py-2 text-sm font-medium hover:bg-stone-50">{{ __('Apply') }}</button>
+                        </form>
+                        @error('code') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    @endif
+                </div>
                 @if ($cart['has_problems'])
                     <p class="mt-4 text-sm text-red-700">{{ __('Remove or update the highlighted items to continue.') }}</p>
                 @else

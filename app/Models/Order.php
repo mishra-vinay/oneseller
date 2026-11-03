@@ -24,6 +24,7 @@ class Order extends Model
             'payment_method' => PaymentMethod::class,
             'items_total' => 'integer',
             'shipping_total' => 'integer',
+            'discount_total' => 'integer',
             'grand_total' => 'integer',
             'refunded_total' => 'integer',
             'placed_at' => 'datetime',

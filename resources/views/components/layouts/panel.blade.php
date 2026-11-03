@@ -3,7 +3,7 @@
     $nav = $area === 'admin'
         ? [
             ['admin.dashboard', __('Dashboard')], ['admin.sellers.index', __('Sellers')], ['admin.buyers.index', __('Buyers')],
-            ['admin.products.index', __('Products')], ['admin.categories.index', __('Categories')], ['admin.orders.index', __('Orders')],
+            ['admin.products.index', __('Products')], ['admin.categories.index', __('Categories')], ['admin.orders.index', __('Orders')], ['admin.coupons.index', __('Coupons')],
             ['admin.ledger.index', __('Seller earnings')], ['admin.activity', __('Activity')], ['admin.settings', __('Settings')],
         ]
         : [

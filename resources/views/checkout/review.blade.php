@@ -25,7 +25,10 @@
 
             <form method="POST" action="{{ route('checkout.place') }}" class="h-fit space-y-4 rounded-lg border border-stone-200 bg-white p-5">
                 @csrf
-                <x-order-totals :items="$cart['items_total']" :shipping="$cart['shipping_total']" :total="$cart['grand_total']" />
+                <x-order-totals :items="$cart['items_total']" :shipping="$cart['shipping_total']" :total="$cart['grand_total']" :discount="$cart['discount_total']" :coupon="$cart['coupon']['code']" />
+                @if ($cart['coupon']['error'])
+                    <p class="text-sm text-red-700">{{ $cart['coupon']['error'] }} <a href="{{ route('cart') }}" class="underline">{{ __('Change it in your cart') }}</a></p>
+                @endif
                 <fieldset class="space-y-2 border-t border-stone-200 pt-4">
                     <legend class="mb-2 text-sm font-medium">{{ __('Payment') }}</legend>
                     @forelse ($methods as $method)

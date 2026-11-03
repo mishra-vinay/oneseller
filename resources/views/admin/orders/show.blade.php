@@ -20,7 +20,7 @@
                         @endforeach
                     </ul>
                     <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-stone-100 pt-3 text-sm sm:grid-cols-4">
-                        <div><dt class="text-xs text-stone-500">{{ __('Shipping') }}</dt><dd><x-money :amount="$subOrder->shipping" /></dd></div>
+                        <div><dt class="text-xs text-stone-500">{{ __('Shipping') }}</dt><dd><x-money :amount="$subOrder->shipping" />@if ($subOrder->discount) <span class="text-xs text-emerald-700">· −<x-money :amount="$subOrder->discount" /> {{ __('coupon') }}</span>@endif</dd></div>
                         <div><dt class="text-xs text-stone-500">{{ __('Commission (:rate%)', ['rate' => $subOrder->commission_bps / 100]) }}</dt><dd><x-money :amount="$subOrder->commission_amount" /></dd></div>
                         <div><dt class="text-xs text-stone-500">{{ __('Net payout') }}</dt><dd><x-money :amount="$subOrder->net_payout" /></dd></div>
                         <div><dt class="text-xs text-stone-500">{{ __('Tracking') }}</dt><dd>{{ $subOrder->tracking_number ? $subOrder->courier.' · '.$subOrder->tracking_number : '—' }}</dd></div>
@@ -48,7 +48,7 @@
         </div>
         <aside class="space-y-4">
             <x-card :title="__('Totals')">
-                <x-order-totals :items="$order->items_total" :shipping="$order->shipping_total" :total="$order->grand_total" :refunded="$order->refunded_total" />
+                <x-order-totals :items="$order->items_total" :shipping="$order->shipping_total" :total="$order->grand_total" :refunded="$order->refunded_total" :discount="$order->discount_total" :coupon="$order->coupon_code" />
             </x-card>
             <x-card :title="__('Ship to')">
                 @foreach ($order->shippingAddressLines() as $line) <p class="text-sm">{{ $line }}</p> @endforeach

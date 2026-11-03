@@ -38,6 +38,10 @@ class OrderConfirmation extends MarketplaceNotification
             $mail->line('Shipping: '.($subOrder->shipping ? Money::format($subOrder->shipping) : 'Free'));
         }
 
+        if ($order->discount_total > 0) {
+            $mail->line("Coupon {$order->coupon_code}: −".Money::format($order->discount_total));
+        }
+
         return $mail
             ->line('**Total: '.Money::format($order->grand_total).'** ('.$order->payment_method->label().')')
             ->action('View your order', $this->link($notifiable));

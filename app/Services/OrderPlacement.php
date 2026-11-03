@@ -23,11 +23,11 @@ use Illuminate\Support\Facades\DB;
  */
 class OrderPlacement
 {
-    public function __construct(private Pricing $pricing, private OrderEvents $events) {}
+    public function __construct(private Pricing $pricing, private OrderEvents $events, private CouponService $coupons) {}
 
-    public function place(User $buyer, Cart $cart, Address $address, PaymentMethod $method): Order
+    public function place(User $buyer, Cart $cart, Address $address, PaymentMethod $method, ?string $couponCode = null): Order
     {
-        $order = DB::transaction(function () use ($buyer, $cart, $address, $method) {
+        $order = DB::transaction(function () use ($buyer, $cart, $address, $method, $couponCode) {
             $items = $cart->items()->orderBy('product_variant_id')->get();
 
             if ($items->isEmpty()) {
@@ -53,6 +53,18 @@ class OrderPlacement
 
             $groups = $items->groupBy(fn ($item) => $products->get($variants->get($item->product_variant_id)->product_id)->store_id);
             $online = $method === PaymentMethod::Online;
+
+            // The coupon row is locked so usage limits hold under concurrent checkouts.
+            $coupon = $this->coupons->evaluate(
+                $couponCode,
+                $groups->map(fn ($storeItems) => (int) $storeItems->sum(fn ($item) => $variants->get($item->product_variant_id)->price * $item->quantity))->all(),
+                $buyer,
+                lock: true,
+            );
+
+            if ($coupon['error']) {
+                throw new CartChangedException($coupon['error']);
+            }
 
             $order = Order::create([
                 'number' => OrderNumber::next(),
@@ -92,6 +104,7 @@ class OrderPlacement
                     'status' => $online ? SubOrderStatus::PendingPayment : SubOrderStatus::Placed,
                     'items_subtotal' => $subtotal,
                     'shipping' => $shipping,
+                    'discount' => $coupon['allocation'][$store->id] ?? 0,
                     'commission_bps' => $bps,
                     'commission_amount' => $commission,
                     'net_payout' => $subtotal - $commission + $shipping,
@@ -122,8 +135,14 @@ class OrderPlacement
             $order->update([
                 'items_total' => $itemsTotal,
                 'shipping_total' => $shippingTotal,
-                'grand_total' => $itemsTotal + $shippingTotal,
+                'coupon_code' => $coupon['coupon']?->code,
+                'discount_total' => $coupon['discount'],
+                'grand_total' => $itemsTotal + $shippingTotal - $coupon['discount'],
             ]);
+
+            if ($coupon['coupon']) {
+                $coupon['coupon']->redemptions()->create(['order_id' => $order->id, 'user_id' => $buyer->id, 'discount' => $coupon['discount']]);
+            }
 
             $cart->items()->delete();
 

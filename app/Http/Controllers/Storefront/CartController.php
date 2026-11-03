@@ -6,17 +6,42 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\CartService;
+use App\Services\CouponService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CartController extends Controller
 {
+    /** Session key holding the coupon code the buyer applied. */
+    public const COUPON = 'cart.coupon';
+
     public function __construct(private CartService $cart) {}
 
-    public function show(): View
+    public function show(Request $request): View
     {
-        return view('storefront.cart', ['cart' => $this->cart->summary()]);
+        return view('storefront.cart', ['cart' => $this->cart->summary(null, $request->session()->get(self::COUPON))]);
+    }
+
+    public function applyCoupon(Request $request): RedirectResponse
+    {
+        $code = CouponService::normalise($request->validate(['code' => ['required', 'string', 'max:40']])['code']);
+        $summary = $this->cart->summary(null, $code);
+
+        if ($summary['coupon']['error']) {
+            return redirect()->route('cart')->withErrors(['code' => $summary['coupon']['error']])->withInput();
+        }
+
+        $request->session()->put(self::COUPON, $code);
+
+        return redirect()->route('cart')->with('status', __('Coupon :code applied: :summary.', ['code' => $code, 'summary' => $summary['coupon']['summary']]));
+    }
+
+    public function removeCoupon(Request $request): RedirectResponse
+    {
+        $request->session()->forget(self::COUPON);
+
+        return redirect()->route('cart')->with('status', __('Coupon removed.'));
     }
 
     public function add(Request $request): RedirectResponse

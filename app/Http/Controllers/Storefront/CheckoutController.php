@@ -68,7 +68,7 @@ class CheckoutController extends Controller
         }
 
         return view('checkout.review', [
-            'cart' => $this->cart->summary(),
+            'cart' => $this->cart->summary(null, $request->session()->get(CartController::COUPON)),
             'address' => $address,
             'methods' => $this->availableMethods(),
         ]);
@@ -90,12 +90,12 @@ class CheckoutController extends Controller
         }
 
         try {
-            $order = $placement->place($request->user(), $cart, $address, $method);
+            $order = $placement->place($request->user(), $cart, $address, $method, $request->session()->get(CartController::COUPON));
         } catch (CartChangedException $e) {
             return redirect()->route('cart')->withErrors(['cart' => $e->getMessage()]);
         }
 
-        $request->session()->forget(self::SESSION_ADDRESS);
+        $request->session()->forget([self::SESSION_ADDRESS, CartController::COUPON]);
 
         return $method === PaymentMethod::Online
             ? redirect()->route('checkout.pay', $order)

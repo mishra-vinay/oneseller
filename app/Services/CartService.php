@@ -22,7 +22,7 @@ class CartService
 
     private const COOKIE_MINUTES = 60 * 24 * 30;
 
-    public function __construct(private Pricing $pricing) {}
+    public function __construct(private Pricing $pricing, private CouponService $coupons) {}
 
     /**
      * Read at call time: this service can outlive a single request (cached controllers, queues).
@@ -131,9 +131,12 @@ class CartService
      * The cart grouped by seller with per-group shipping. Items that can no longer
      * be bought (unlisted product, out of stock, too few left) are flagged.
      *
-     * @return array{groups: Collection<int, array<string, mixed>>, items_total: int, shipping_total: int, grand_total: int, count: int, has_problems: bool}
+     * With a coupon code, the discount is worked out and shared across the parcels;
+     * an invalid code leaves the totals alone and explains why in coupon.error.
+     *
+     * @return array{groups: Collection<int, array<string, mixed>>, items_total: int, shipping_total: int, discount_total: int, coupon: array{code: ?string, summary: ?string, error: ?string}, grand_total: int, count: int, has_problems: bool}
      */
-    public function summary(?Cart $cart = null): array
+    public function summary(?Cart $cart = null, ?string $couponCode = null): array
     {
         $cart ??= $this->current();
 
@@ -174,11 +177,24 @@ class CartService
         $itemsTotal = (int) $groups->sum('subtotal');
         $shippingTotal = (int) $groups->sum('shipping');
 
+        $coupon = $this->coupons->evaluate(
+            $couponCode,
+            $groups->mapWithKeys(fn ($g) => [$g['store']->id => $g['subtotal']])->all(),
+            $this->request()->user(),
+        );
+        $groups = $groups->map(fn ($g) => [...$g, 'discount' => $coupon['allocation'][$g['store']->id] ?? 0]);
+
         return [
             'groups' => $groups,
             'items_total' => $itemsTotal,
             'shipping_total' => $shippingTotal,
-            'grand_total' => $itemsTotal + $shippingTotal,
+            'discount_total' => $coupon['discount'],
+            'coupon' => [
+                'code' => CouponService::normalise($couponCode),
+                'summary' => $coupon['coupon']?->summary(),
+                'error' => $coupon['error'],
+            ],
+            'grand_total' => $itemsTotal + $shippingTotal - $coupon['discount'],
             'count' => (int) $items->sum('quantity'),
             'has_problems' => $items->contains(fn ($i) => $i->problem !== null),
         ];
