@@ -227,4 +227,17 @@ A change to a live product's name, descriptions, options, any variant price, or 
 
 ## Push notifications
 
-See **Devices** in this file once push is enabled: `POST /devices` registers an FCM token for the signed-in user.
+Push goes through Firebase Cloud Messaging. After signing in, the app registers its FCM token. Before signing out, it removes the token.
+
+| Method | Path | Body |
+|---|---|---|
+| POST | `/devices` | `token, platform (android\|ios)`. A token already registered to another account moves to this one. |
+| DELETE | `/devices/{token}` | |
+
+Every email or in-panel notification is also pushed to the user's devices:
+- `notification.title` is the site name
+- `notification.body` is the event, e.g. "Shipped: OS-2026-000123-1"
+- `data.type` is the event name: `OrderConfirmation`, `SubOrderShipped`, `SubOrderDelivered`, `SubOrderCancelled`, `NewSubOrder`, `ReturnUpdated`, `ReturnRequested`, `NewMessage`, `ProductReviewed`, `StoreReviewed`, `LowStockDigest`, …
+- `data.url` is the matching website link; use `data.type` to choose the app screen
+
+Tokens Firebase reports as unregistered are deleted automatically. Push stays off until `FCM_CREDENTIALS` or `FCM_CREDENTIALS_JSON` is set on the server.

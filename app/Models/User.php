@@ -68,6 +68,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->wishlist()->whereKey($product->id)->exists();
     }
 
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'buyer_id');

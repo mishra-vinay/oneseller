@@ -36,6 +36,8 @@ Route::name('api.')->group(function () {
         Route::patch('/me', [V1\AuthController::class, 'updateMe'])->name('me.update');
         Route::put('/me/password', [V1\AuthController::class, 'updatePassword'])->name('me.password');
         Route::post('/me/email/verification', [V1\AuthController::class, 'resendVerification'])->middleware('throttle:6,1')->name('me.verification');
+        Route::post('/devices', [V1\DeviceController::class, 'store'])->name('devices.store');
+        Route::delete('/devices/{token}', [V1\DeviceController::class, 'destroy'])->where('token', '.*')->name('devices.destroy');
 
         // Messages work for both roles: buyers see their stores, sellers their buyers.
         Route::get('/conversations', [V1\MessageController::class, 'index'])->name('conversations');

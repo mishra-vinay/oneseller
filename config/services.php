@@ -35,6 +35,12 @@ return [
         ],
     ],
 
+    // Firebase Cloud Messaging service account: a JSON file path, or the JSON itself (optionally base64).
+    'fcm' => [
+        'credentials' => env('FCM_CREDENTIALS'),
+        'credentials_json' => env('FCM_CREDENTIALS_JSON'),
+    ],
+
     'razorpay' => [
         'key_id' => env('RAZORPAY_KEY_ID'),
         'key_secret' => env('RAZORPAY_KEY_SECRET'),
