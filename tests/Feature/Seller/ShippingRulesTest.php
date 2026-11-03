@@ -73,7 +73,8 @@ class ShippingRulesTest extends TestCase
 
         $store->refresh();
         $this->assertSame(ShippingMode::Weight, $store->shipping_mode);
-        $this->assertSame([['up_to_grams' => 500, 'paise' => 4000], ['up_to_grams' => 2000, 'paise' => 9000]], $store->shipping_slabs, 'sorted by weight, blanks dropped');
+        // assertEquals: MySQL 8 does not keep JSON object key order.
+        $this->assertEquals([['up_to_grams' => 500, 'paise' => 4000], ['up_to_grams' => 2000, 'paise' => 9000]], $store->shipping_slabs, 'sorted by weight, blanks dropped');
         $this->assertSame(500000, $store->shipping_free_above_paise);
 
         // 3 × 500 g = 1.5 kg → ₹90 slab.

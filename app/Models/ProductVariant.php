@@ -31,20 +31,38 @@ class ProductVariant extends Model
 
     /**
      * "M / Red" for a variant with options, null for a product's only variant.
+     * Values follow the product's option order: MySQL does not keep JSON key order.
+     *
+     * @param  array<int, string>|null  $optionNames
      */
-    public function label(): ?string
+    public function label(?array $optionNames = null): ?string
     {
-        return $this->options ? implode(' / ', array_values($this->options)) : null;
+        if (! $this->options) {
+            return null;
+        }
+
+        $optionNames ??= $this->relationLoaded('product') ? $this->product?->option_names : null;
+        $values = $optionNames
+            ? array_values(array_filter(array_map(fn ($name) => $this->options[$name] ?? null, $optionNames), fn ($v) => $v !== null))
+            : array_values($this->options);
+
+        return implode(' / ', $values);
     }
 
     /**
-     * Stable key for an option combination, used to match variants when options change.
+     * Key for an option combination, independent of key order, used to match variants when options change.
      *
      * @param  array<string, string>|null  $options
      */
     public static function keyFor(?array $options): string
     {
-        return $options ? json_encode(array_values($options)) : '';
+        if (! $options) {
+            return '';
+        }
+
+        ksort($options);
+
+        return json_encode($options);
     }
 
     public function isLowStock(): bool

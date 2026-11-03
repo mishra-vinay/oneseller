@@ -12,7 +12,7 @@ class InventoryController extends SellerApiController
 {
     public function index(Request $request): JsonResponse
     {
-        $variants = ProductVariant::with('product:id,name,status')
+        $variants = ProductVariant::with('product:id,name,status,option_names')
             ->whereHas('product', fn ($q) => $q->where('store_id', $this->currentStore($request)->id))
             ->when($request->boolean('low'), fn ($q) => $q->where('stock', '<=', ProductVariant::LOW_STOCK_THRESHOLD))
             ->orderBy('product_id')->orderBy('position')

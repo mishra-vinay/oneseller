@@ -45,7 +45,8 @@ class Product extends Model
 
     public function variants(): HasMany
     {
-        return $this->hasMany(ProductVariant::class)->orderBy('position')->orderBy('id');
+        // chaperone(): each variant knows its product without another query (labels need the option order).
+        return $this->hasMany(ProductVariant::class)->orderBy('position')->orderBy('id')->chaperone('product');
     }
 
     public function hasOptions(): bool
@@ -73,7 +74,7 @@ class Product extends Model
 
     public function defaultVariant(): HasOne
     {
-        return $this->hasOne(ProductVariant::class)->where('is_default', true);
+        return $this->hasOne(ProductVariant::class)->where('is_default', true)->chaperone('product');
     }
 
     public function reviews(): HasMany

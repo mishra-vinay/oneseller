@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Orders\OrderTestHelpers;
 use Tests\TestCase;
 
@@ -185,6 +186,24 @@ class ProductVariantTest extends TestCase
 
         $this->product->variants()->orderByDesc('id')->first()->update(['stock' => 1]);
         $this->get("/c/{$category->slug}?in_stock=1")->assertSee('Cotton T-Shirt');
+    }
+
+    public function test_labels_and_matching_do_not_depend_on_stored_json_key_order(): void
+    {
+        $this->addSizeAndColour();
+        $ids = $this->product->variants()->pluck('id')->all();
+
+        // MySQL 8 stores JSON objects with keys sorted by length, e.g. {"Size": …, "Colour": …} may come back reordered.
+        foreach (DB::table('product_variants')->whereIn('id', $ids)->get() as $row) {
+            $reversed = array_reverse(json_decode($row->options, true), true);
+            DB::table('product_variants')->where('id', $row->id)->update(['options' => json_encode($reversed)]);
+        }
+
+        $product = $this->product->fresh('variants');
+        $this->assertSame('S / Red', $product->variants->first()->label());
+
+        $this->put("/seller/products/{$this->product->id}", [...$this->form(), 'options' => [['name' => 'Size', 'values' => 'S, M, L'], ['name' => 'Colour', 'values' => 'Red, Blue']]]);
+        $this->assertEqualsCanonicalizing($ids, $this->product->variants()->pluck('id')->all(), 'existing variants are kept, not recreated');
     }
 
     public function test_inventory_lists_each_variant(): void

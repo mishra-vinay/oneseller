@@ -62,7 +62,8 @@ jobs:
           DB_DATABASE: ${{ matrix.database == 'mysql' && 'oneseller_test' || ':memory:' }}
           DB_USERNAME: root
           DB_PASSWORD: root
-        run: php artisan test
+        # Plain PHPUnit with --display-warnings prints warnings in full (the artisan runner truncates them).
+        run: vendor/bin/phpunit --display-warnings --display-deprecations
 
   # Deploys main to the server after the tests pass. Does nothing until the
   # DEPLOY_* secrets are set (see docs/DEPLOYMENT.md, "Automatic deploys").
