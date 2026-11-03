@@ -34,6 +34,7 @@ class SettingsTest extends TestCase
             'support_email' => 'help@example.com',
             'order_notification_email' => '',
             'auto_approve_products' => '1',
+            'return_window_days' => '10',
             // cod_enabled and auto_approve_sellers left unchecked
         ])->assertSessionHasNoErrors();
 

@@ -37,6 +37,13 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
         Route::post('/orders/{subOrder}/deliver', [Seller\OrderController::class, 'deliver'])->whereNumber('subOrder')->name('orders.deliver');
         Route::post('/orders/{subOrder}/cancel', [Seller\OrderController::class, 'cancel'])->whereNumber('subOrder')->name('orders.cancel');
 
+        Route::get('/returns', [Seller\ReturnController::class, 'index'])->name('returns.index');
+        Route::get('/returns/{return}', [Seller\ReturnController::class, 'show'])->name('returns.show');
+        Route::post('/returns/{return}/approve', [Seller\ReturnController::class, 'approve'])->name('returns.approve');
+        Route::post('/returns/{return}/reject', [Seller\ReturnController::class, 'reject'])->name('returns.reject');
+        Route::post('/returns/{return}/receive', [Seller\ReturnController::class, 'receive'])->name('returns.receive');
+        Route::post('/returns/{return}/replace', [Seller\ReturnController::class, 'replace'])->name('returns.replace');
+
         Route::get('/customers', Seller\CustomerController::class)->name('customers');
         Route::get('/reviews', [Seller\ReviewController::class, 'index'])->name('reviews');
         Route::post('/reviews/{review}/reply', [Seller\ReviewController::class, 'reply'])->whereNumber('review')->name('reviews.reply');

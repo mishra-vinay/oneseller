@@ -47,6 +47,11 @@ class SubOrder extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function returns(): HasMany
+    {
+        return $this->hasMany(ReturnRequest::class)->latest('id');
+    }
+
     /**
      * What the buyer pays for this portion, after its share of any coupon.
      */

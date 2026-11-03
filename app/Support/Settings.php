@@ -30,6 +30,7 @@ class Settings
         'cod_enabled' => true,
         'auto_approve_sellers' => false,
         'auto_approve_products' => false,
+        'return_window_days' => 7,
     ];
 
     public function get(string $key): mixed

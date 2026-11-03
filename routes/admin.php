@@ -51,6 +51,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/orders/{order}/portions/{subOrder}/cancel', [Admin\OrderController::class, 'cancelPortion'])->whereNumber('subOrder')->name('orders.cancel-portion');
     Route::post('/orders/{order}/portions/{subOrder}/refund', [Admin\OrderController::class, 'refundPortion'])->whereNumber('subOrder')->name('orders.refund-portion');
 
+    Route::get('/returns', [Admin\ReturnController::class, 'index'])->name('returns.index');
+    Route::get('/returns/{return}', [Admin\ReturnController::class, 'show'])->name('returns.show');
+    Route::post('/returns/{return}/approve', [Admin\ReturnController::class, 'approve'])->name('returns.approve');
+    Route::post('/returns/{return}/reject', [Admin\ReturnController::class, 'reject'])->name('returns.reject');
+    Route::post('/returns/{return}/refund', [Admin\ReturnController::class, 'refund'])->name('returns.refund');
+
     Route::get('/coupons', [Admin\CouponController::class, 'index'])->name('coupons.index');
     Route::get('/coupons/create', [Admin\CouponController::class, 'create'])->name('coupons.create');
     Route::post('/coupons', [Admin\CouponController::class, 'store'])->name('coupons.store');

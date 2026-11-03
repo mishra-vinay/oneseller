@@ -47,7 +47,14 @@
                             <div>{{ __('Courier') }}: <span class="text-stone-900">{{ $subOrder->courier }}</span> · {{ __('Tracking') }}: <span class="font-medium text-stone-900">{{ $subOrder->tracking_number }}</span></div>
                         @endif
                         @if ($subOrder->status === SubOrderStatus::Delivered)
-                            <div>{{ __('Delivered :date', ['date' => $subOrder->delivered_at->format('d M Y')]) }}</div>
+                            <div>{{ __('Delivered :date', ['date' => $subOrder->delivered_at->format('d M Y')]) }}
+                                @if (app(\App\Services\Returns::class)->windowOpen($subOrder))
+                                    · <a href="{{ route('returns.create', [$order, $subOrder->id]) }}" class="font-medium text-stone-900 hover:underline">{{ __('Return or replace') }}</a>
+                                @endif
+                            </div>
+                            @foreach ($subOrder->returns as $return)
+                                <div><a href="{{ route('account.returns.show', $return) }}" class="hover:underline">{{ __('Return :number', ['number' => $return->number]) }}</a> · {{ __($return->status->label()) }}</div>
+                            @endforeach
                         @elseif ($subOrder->status === SubOrderStatus::Cancelled)
                             <div class="text-red-700">{{ __('Cancelled: :reason', ['reason' => $subOrder->cancel_reason]) }} @if ($subOrder->refunded_at) · {{ __('Refunded') }} @endif</div>
                         @endif

@@ -27,6 +27,7 @@ class SettingsController extends Controller
             'free_shipping_threshold_rupees' => $rupees,
             'support_email' => ['nullable', 'email', 'max:255'],
             'order_notification_email' => ['nullable', 'email', 'max:255'],
+            'return_window_days' => ['required', 'integer', 'min:0', 'max:90'],
         ], [
             'default_commission_percent.regex' => __('Enter a percentage between 0 and 99.99.'),
             '*.regex' => __('Enter an amount in rupees, e.g. 49 or 49.50.'),
@@ -41,6 +42,7 @@ class SettingsController extends Controller
             'support_email' => $data['support_email'] ?? null,
             'order_notification_email' => $data['order_notification_email'] ?? null,
             'cod_enabled' => $request->boolean('cod_enabled'),
+            'return_window_days' => (int) $data['return_window_days'],
             'auto_approve_sellers' => $request->boolean('auto_approve_sellers'),
             'auto_approve_products' => $request->boolean('auto_approve_products'),
         ]);
