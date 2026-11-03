@@ -9,6 +9,9 @@
     <div class="p-3">
         <div class="line-clamp-2 text-sm font-medium group-hover:underline">{{ $product->name }}</div>
         <div class="mt-0.5 truncate text-xs text-stone-500">{{ $product->store->name }}</div>
+        @if ($product->rating_count > 0)
+            <x-stars :rating="$product->rating_avg" :count="$product->rating_count" size="text-xs" class="mt-1" />
+        @endif
         <div class="mt-2 flex items-baseline gap-2 text-sm">
             @if ($product->hasPriceRange()) <span class="text-xs text-stone-500">{{ __('From') }}</span> @endif
             <x-money :amount="$variant->price" class="font-semibold" />

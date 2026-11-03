@@ -3,12 +3,12 @@
     $nav = $area === 'admin'
         ? [
             ['admin.dashboard', __('Dashboard')], ['admin.sellers.index', __('Sellers')], ['admin.buyers.index', __('Buyers')],
-            ['admin.products.index', __('Products')], ['admin.categories.index', __('Categories')], ['admin.orders.index', __('Orders')], ['admin.coupons.index', __('Coupons')],
+            ['admin.products.index', __('Products')], ['admin.reviews.index', __('Reviews')], ['admin.categories.index', __('Categories')], ['admin.orders.index', __('Orders')], ['admin.coupons.index', __('Coupons')],
             ['admin.ledger.index', __('Seller earnings')], ['admin.activity', __('Activity')], ['admin.settings', __('Settings')],
         ]
         : [
             ['seller.dashboard', __('Dashboard')], ['seller.products.index', __('Products')], ['seller.inventory', __('Inventory')],
-            ['seller.orders.index', __('Orders')], ['seller.customers', __('Customers')], ['seller.earnings', __('Earnings')], ['seller.shipping', __('Shipping')],
+            ['seller.orders.index', __('Orders')], ['seller.customers', __('Customers')], ['seller.reviews', __('Reviews')], ['seller.earnings', __('Earnings')], ['seller.shipping', __('Shipping')],
             ['seller.store', __('Store profile')],
         ];
     $nav = array_filter($nav, fn ($item) => \Illuminate\Support\Facades\Route::has($item[0]));

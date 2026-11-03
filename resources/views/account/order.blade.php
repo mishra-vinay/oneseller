@@ -32,7 +32,13 @@
                     </header>
                     <ul class="divide-y divide-stone-100 text-sm">
                         @foreach ($subOrder->items as $item)
-                            <li class="flex justify-between gap-4 px-4 py-3"><span>{{ $item->quantity }} × {{ $item->displayName() }}</span><x-money :amount="$item->line_total" /></li>
+                            <li class="flex flex-wrap justify-between gap-x-4 gap-y-1 px-4 py-3">
+                                <span>{{ $item->quantity }} × {{ $item->displayName() }}</span>
+                                <x-money :amount="$item->line_total" />
+                                @if ($subOrder->status === SubOrderStatus::Delivered && $item->product?->isVisible())
+                                    <a href="{{ $item->product->url() }}#reviews" class="w-full text-xs font-medium hover:underline">{{ __('Write a review') }}</a>
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                     <footer class="space-y-1 border-t border-stone-100 px-4 py-3 text-sm text-stone-600">

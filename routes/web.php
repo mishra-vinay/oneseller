@@ -68,9 +68,12 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
     });
 
     Route::get('/order/{order}', [Account\OrderController::class, 'show'])->name('order.show');
+    Route::post('/wishlist/{product}', [Account\WishlistController::class, 'toggle'])->whereNumber('product')->name('wishlist.toggle');
+    Route::post('/product/{store}/{product}/review', [Storefront\ReviewController::class, 'store'])->middleware('throttle:10,1')->name('review.store');
 
     Route::prefix('account')->name('account.')->group(function () {
         Route::get('/orders', [Account\OrderController::class, 'index'])->name('orders');
+        Route::get('/wishlist', [Account\WishlistController::class, 'index'])->name('wishlist');
         Route::get('/profile', [Account\ProfileController::class, 'edit'])->name('profile');
         Route::put('/profile', [Account\ProfileController::class, 'update'])->name('profile.update');
         Route::put('/password', [Account\ProfileController::class, 'updatePassword'])->name('password.update');

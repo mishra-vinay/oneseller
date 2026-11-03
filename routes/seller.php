@@ -38,6 +38,8 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
         Route::post('/orders/{subOrder}/cancel', [Seller\OrderController::class, 'cancel'])->whereNumber('subOrder')->name('orders.cancel');
 
         Route::get('/customers', Seller\CustomerController::class)->name('customers');
+        Route::get('/reviews', [Seller\ReviewController::class, 'index'])->name('reviews');
+        Route::post('/reviews/{review}/reply', [Seller\ReviewController::class, 'reply'])->whereNumber('review')->name('reviews.reply');
         Route::get('/earnings', Seller\EarningsController::class)->name('earnings');
 
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');

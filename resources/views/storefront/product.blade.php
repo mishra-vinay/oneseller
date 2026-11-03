@@ -32,7 +32,20 @@
         </div>
 
         <div>
-            <h1 class="text-2xl font-semibold">{{ $product->name }}</h1>
+            <div class="flex items-start justify-between gap-3">
+                <h1 class="text-2xl font-semibold">{{ $product->name }}</h1>
+                @if (! auth()->check() || auth()->user()->role === \App\Enums\Role::Buyer)
+                    <form method="POST" action="{{ route('wishlist.toggle', $product->id) }}">
+                        @csrf
+                        <button class="rounded-full border border-stone-300 px-3 py-1.5 text-sm hover:border-stone-500" aria-pressed="{{ $wishlisted ? 'true' : 'false' }}">
+                            <span aria-hidden="true" @class(['text-red-600' => $wishlisted])>{{ $wishlisted ? '♥' : '♡' }}</span> {{ $wishlisted ? __('Saved') : __('Save') }}
+                        </button>
+                    </form>
+                @endif
+            </div>
+            @if ($product->rating_count > 0)
+                <a href="#reviews" class="mt-1 inline-block hover:underline"><x-stars :rating="$product->rating_avg" :count="$product->rating_count" /></a>
+            @endif
             <div class="mt-3 flex items-baseline gap-3">
                 @if ($product->hasPriceRange()) <span class="text-sm text-stone-500">{{ __('From') }}</span> @endif
                 <x-money :amount="$product->defaultVariant->price" class="text-2xl font-semibold" />
@@ -108,6 +121,48 @@
             <div class="whitespace-pre-line text-stone-700">{{ $product->description }}</div>
         </section>
     @endif
+
+    <section id="reviews" class="mt-10 max-w-3xl">
+        <h2 class="mb-3 text-lg font-semibold">{{ __('Reviews') }}</h2>
+        @if ($product->rating_count > 0)
+            <p class="mb-4 flex items-center gap-2"><x-stars :rating="$product->rating_avg" size="text-lg" /> <span class="text-sm text-stone-600">{{ __(':avg out of 5 · :count reviews', ['avg' => number_format($product->rating_avg, 1), 'count' => $product->rating_count]) }}</span></p>
+        @endif
+
+        @if ($canReview)
+            <form method="POST" action="{{ route('review.store', [$product->store->slug, $product->slug]) }}" class="mb-6 space-y-3 rounded-lg border border-stone-200 bg-white p-4">
+                @csrf
+                <fieldset>
+                    <legend class="mb-1 text-sm font-medium">{{ $myReview ? __('Update your review') : __('Rate this product') }}</legend>
+                    <div class="flex gap-3 text-sm">
+                        @foreach (range(5, 1) as $stars)
+                            <label class="flex items-center gap-1"><input type="radio" name="rating" value="{{ $stars }}" @checked((int) old('rating', $myReview?->rating) === $stars) required> {{ str_repeat('★', $stars) }}</label>
+                        @endforeach
+                    </div>
+                    @error('rating') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </fieldset>
+                <x-form.input name="title" :label="__('Title (optional)')" :value="$myReview?->title" maxlength="120" />
+                <x-form.textarea name="body" :label="__('Your review (optional)')" :value="$myReview?->body" rows="3" />
+                <x-form.button>{{ $myReview ? __('Update review') : __('Post review') }}</x-form.button>
+            </form>
+        @endif
+
+        @forelse ($reviews as $review)
+            <article class="border-b border-stone-200 py-4 last:border-0">
+                <div class="flex flex-wrap items-center gap-2 text-sm">
+                    <x-stars :rating="$review->rating" />
+                    @if ($review->title) <span class="font-medium">{{ $review->title }}</span> @endif
+                </div>
+                <p class="mt-1 text-xs text-stone-500">{{ $review->authorName() }} · {{ __('Verified purchase') }} · {{ $review->created_at->format('d M Y') }}</p>
+                @if ($review->body) <p class="mt-2 whitespace-pre-line text-sm text-stone-700">{{ $review->body }}</p> @endif
+                @if ($review->seller_reply)
+                    <div class="mt-3 rounded-md bg-stone-100 px-3 py-2 text-sm"><span class="font-medium">{{ __('Reply from :store', ['store' => $product->store->name]) }}:</span> {{ $review->seller_reply }}</div>
+                @endif
+            </article>
+        @empty
+            <p class="text-sm text-stone-500">{{ __('No reviews yet.') }}</p>
+        @endforelse
+        <div class="mt-4">{{ $reviews->fragment('reviews')->links() }}</div>
+    </section>
 
     @if ($moreFromStore->isNotEmpty())
         <section class="mt-10">

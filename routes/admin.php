@@ -30,6 +30,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/products/{product}/disable', [Admin\ProductController::class, 'disable'])->name('products.disable');
     Route::post('/products/{product}/enable', [Admin\ProductController::class, 'enable'])->name('products.enable');
 
+    Route::get('/reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('/reviews/{review}/toggle', [Admin\ReviewController::class, 'toggle'])->name('reviews.toggle');
+
     Route::get('/categories', [Admin\CategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [Admin\CategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [Admin\CategoryController::class, 'store'])->name('categories.store');

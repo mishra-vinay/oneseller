@@ -28,6 +28,8 @@ class Product extends Model
             'admin_disabled' => 'boolean',
             'approved_at' => 'datetime',
             'option_names' => 'array',
+            'rating_avg' => 'float',
+            'rating_count' => 'integer',
         ];
     }
 
@@ -72,6 +74,11 @@ class Product extends Model
     public function defaultVariant(): HasOne
     {
         return $this->hasOne(ProductVariant::class)->where('is_default', true);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     public function images(): HasMany
