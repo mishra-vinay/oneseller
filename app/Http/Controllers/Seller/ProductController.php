@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Enums\ProductStatus;
+use App\Http\Requests\SellerProductInput;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
-use App\Support\Money;
-use App\Support\Rules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProductController extends SellerController
@@ -92,76 +89,7 @@ class ProductController extends SellerController
      */
     private function validated(Request $request, ?Product $product = null): array
     {
-        $existingImages = $product ? $product->images()->whereNotIn('id', $request->input('remove_images', []))->count() : 0;
-        $maxNew = Product::MAX_IMAGES - $existingImages;
-
-        // A product with saved options is edited as a table of variant rows; otherwise flat fields.
-        $flat = ! $request->has('variants');
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:200'],
-            'category_id' => ['required', Rule::exists('categories', 'id')->where('is_active', true)],
-            'price' => [Rule::requiredIf($flat), Rules::RUPEES],
-            'compare_at_price' => ['nullable', Rules::RUPEES],
-            'stock' => [Rule::requiredIf($flat), 'integer', 'min:0', 'max:1000000'],
-            'sku' => [Rule::requiredIf($flat), 'string', 'max:64'],
-            'weight_grams' => ['nullable', 'integer', 'min:0', 'max:100000'],
-            'options' => ['array', 'max:'.ProductService::MAX_OPTIONS],
-            'options.*.name' => ['nullable', 'string', 'max:30'],
-            'options.*.values' => ['nullable', 'string', 'max:300'],
-            'variants' => ['array'],
-            'variants.*.sku' => ['required', 'string', 'max:64'],
-            'variants.*.price' => ['required', Rules::RUPEES],
-            'variants.*.compare_at_price' => ['nullable', Rules::RUPEES],
-            'variants.*.stock' => ['required', 'integer', 'min:0', 'max:1000000'],
-            'variants.*.weight_grams' => ['nullable', 'integer', 'min:0', 'max:100000'],
-            'short_description' => ['nullable', 'string', 'max:500'],
-            'description' => ['nullable', 'string', 'max:20000'],
-            'images' => ['array', 'max:'.max(0, $maxNew)],
-            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'remove_images' => ['array'],
-            'remove_images.*' => ['integer'],
-        ], [
-            ...Rules::messages(),
-            'variants.*.price.regex' => __('Enter prices in rupees, e.g. 499 or 499.50.'),
-            'images.max' => __('A product can have at most :max images.', ['max' => Product::MAX_IMAGES]),
-        ]);
-
-        $combinations = count(ProductService::combinations(array_values(array_filter(
-            array_map(fn ($o) => ['name' => trim($o['name'] ?? ''), 'values' => array_filter(array_map('trim', explode(',', $o['values'] ?? '')), 'strlen')], $data['options'] ?? []),
-            fn ($o) => $o['name'] !== '' && $o['values'] !== [],
-        ))));
-
-        if ($combinations > ProductService::MAX_VARIANTS) {
-            throw ValidationException::withMessages(['options' => __('That makes :count combinations; the limit is :max.', ['count' => $combinations, 'max' => ProductService::MAX_VARIANTS])]);
-        }
-
-        if ($flat) {
-            [$data['price'], $data['compare_at_price']] = $this->prices($data['price'], $data['compare_at_price'] ?? null);
-        } else {
-            unset($data['price'], $data['compare_at_price'], $data['sku'], $data['stock']);
-
-            foreach ($data['variants'] as $id => $row) {
-                [$row['price'], $row['compare_at_price']] = $this->prices($row['price'], $row['compare_at_price'] ?? null);
-                $row['weight_grams'] = (int) ($row['weight_grams'] ?? 0);
-                $data['variants'][$id] = $row;
-            }
-        }
-
-        $data['is_published'] = $request->boolean('is_published');
-
-        return $data;
-    }
-
-    /**
-     * @return array{0: int, 1: int|null} price and compare-at price in paise; compare-at is dropped unless higher
-     */
-    private function prices(string $price, ?string $compareAt): array
-    {
-        $price = Money::fromRupees($price);
-        $compareAt = filled($compareAt) ? Money::fromRupees($compareAt) : null;
-
-        return [$price, $compareAt !== null && $compareAt > $price ? $compareAt : null];
+        return SellerProductInput::validate($request, $product);
     }
 
     private function savedMessage(Product $product): string

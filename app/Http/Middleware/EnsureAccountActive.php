@@ -17,6 +17,13 @@ class EnsureAccountActive
         $user = $request->user();
 
         if ($user && ! $user->isActive()) {
+            if (! $request->hasSession()) {
+                // API: revoke the token so the app has to sign in again.
+                $user->currentAccessToken()?->delete();
+
+                return response()->json(['message' => __('This account has been deactivated. Please contact support.')], 403);
+            }
+
             $loginRoute = $user->role->loginRoute();
 
             Auth::guard('web')->logout();

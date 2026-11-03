@@ -8,6 +8,7 @@ use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Services\CartService;
+use App\Services\CheckoutOptions;
 use App\Services\OrderPlacement;
 use App\Services\Payments\RazorpayGateway;
 use App\Support\IndianStates;
@@ -129,9 +130,6 @@ class CheckoutController extends Controller
      */
     private function availableMethods(): array
     {
-        return array_values(array_filter([
-            $this->razorpay->isConfigured() ? PaymentMethod::Online : null,
-            $this->settings->get('cod_enabled') ? PaymentMethod::Cod : null,
-        ]));
+        return app(CheckoutOptions::class)->paymentMethods();
     }
 }

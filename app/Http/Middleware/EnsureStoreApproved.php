@@ -18,7 +18,9 @@ class EnsureStoreApproved
         abort_if($store === null, 403);
 
         if (! $store->isApproved()) {
-            return redirect()->route('seller.pending');
+            return $request->expectsJson()
+                ? response()->json(['message' => __('Your store is not approved yet.'), 'store_status' => $store->status->value], 403)
+                : redirect()->route('seller.pending');
         }
 
         return $next($request);

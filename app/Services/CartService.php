@@ -20,6 +20,9 @@ class CartService
 {
     public const COOKIE = 'cart_token';
 
+    /** Mobile apps send the guest cart token in this header instead of a cookie. */
+    public const HEADER = 'X-Cart-Token';
+
     private const COOKIE_MINUTES = 60 * 24 * 30;
 
     public function __construct(private Pricing $pricing, private CouponService $coupons) {}
@@ -32,15 +35,26 @@ class CartService
         return request();
     }
 
+    /**
+     * A guest cart created during this request, which the request's own cookie/header cannot point to yet.
+     *
+     * @var \WeakMap<Request, Cart>|null
+     */
+    private ?\WeakMap $created = null;
+
     public function current(): ?Cart
     {
+        if ($this->created && isset($this->created[$this->request()])) {
+            return $this->created[$this->request()];
+        }
+
         $user = $this->request()->user();
 
         if ($user) {
             return Cart::firstWhere('user_id', $user->id);
         }
 
-        $token = $this->request()->cookie(self::COOKIE);
+        $token = $this->guestToken();
 
         return $token ? Cart::whereNull('user_id')->firstWhere('token', $token) : null;
     }
@@ -57,8 +71,16 @@ class CartService
 
         $token = Str::random(40);
         Cookie::queue(self::COOKIE, $token, self::COOKIE_MINUTES);
+        $cart = Cart::create(['token' => $token]);
+        $this->created ??= new \WeakMap;
+        $this->created[$this->request()] = $cart;
 
-        return Cart::create(['token' => $token]);
+        return $cart;
+    }
+
+    public function guestToken(): ?string
+    {
+        return $this->request()->header(self::HEADER) ?: $this->request()->cookie(self::COOKIE);
     }
 
     public function count(): int

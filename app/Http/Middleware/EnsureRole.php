@@ -19,11 +19,15 @@ class EnsureRole
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->guest(route($required->loginRoute()));
+            return $request->expectsJson()
+                ? response()->json(['message' => __('Unauthenticated.')], 401)
+                : redirect()->guest(route($required->loginRoute()));
         }
 
         if (! $user->hasRole($required)) {
-            return redirect()->route($user->role->homeRoute());
+            return $request->expectsJson()
+                ? response()->json(['message' => __('This account cannot use this part of the app.')], 403)
+                : redirect()->route($user->role->homeRoute());
         }
 
         return $next($request);
