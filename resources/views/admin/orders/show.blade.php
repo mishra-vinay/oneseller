@@ -23,6 +23,9 @@
                         <div><dt class="text-xs text-stone-500">{{ __('Shipping') }}</dt><dd><x-money :amount="$subOrder->shipping" />@if ($subOrder->discount) <span class="text-xs text-emerald-700">· −<x-money :amount="$subOrder->discount" /> {{ __('coupon') }}</span>@endif</dd></div>
                         <div><dt class="text-xs text-stone-500">{{ __('Commission (:rate%)', ['rate' => $subOrder->commission_bps / 100]) }}</dt><dd><x-money :amount="$subOrder->commission_amount" /></dd></div>
                         <div><dt class="text-xs text-stone-500">{{ __('Net payout') }}</dt><dd><x-money :amount="$subOrder->net_payout" /></dd></div>
+                        @if ($subOrder->transfer_status)
+                            <div><dt class="text-xs text-stone-500">{{ __('Route transfer') }}</dt><dd>{{ $subOrder->transfer_status }}</dd></div>
+                        @endif
                         <div><dt class="text-xs text-stone-500">{{ __('Tracking') }}</dt><dd>{{ $subOrder->tracking_number ? $subOrder->courier.' · '.$subOrder->tracking_number : '—' }}</dd></div>
                     </dl>
                     @if ($subOrder->cancel_reason)

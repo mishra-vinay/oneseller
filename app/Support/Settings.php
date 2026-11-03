@@ -31,6 +31,7 @@ class Settings
         'auto_approve_sellers' => false,
         'auto_approve_products' => false,
         'return_window_days' => 7,
+        'route_settlement_enabled' => false,
     ];
 
     public function get(string $key): mixed

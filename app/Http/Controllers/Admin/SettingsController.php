@@ -45,6 +45,7 @@ class SettingsController extends Controller
             'return_window_days' => (int) $data['return_window_days'],
             'auto_approve_sellers' => $request->boolean('auto_approve_sellers'),
             'auto_approve_products' => $request->boolean('auto_approve_products'),
+            'route_settlement_enabled' => $request->boolean('route_settlement_enabled'),
         ]);
 
         return back()->with('status', __('Settings saved.'));

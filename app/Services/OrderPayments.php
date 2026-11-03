@@ -8,6 +8,7 @@ use App\Enums\SubOrderStatus;
 use App\Models\Activity;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\Payments\RouteSettlement;
 use Illuminate\Support\Facades\DB;
 
 class OrderPayments
@@ -55,7 +56,9 @@ class OrderPayments
         });
 
         if ($becamePaid) {
-            $this->events->placed($payment->order->fresh());
+            $order = $payment->order->fresh();
+            app(RouteSettlement::class)->createTransfers($order, $payment->fresh());
+            $this->events->placed($order);
         }
 
         return $becamePaid;

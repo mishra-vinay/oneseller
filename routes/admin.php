@@ -21,6 +21,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/sellers/{store}/suspend', [Admin\SellerController::class, 'suspend'])->name('sellers.suspend');
     Route::post('/sellers/{store}/reactivate', [Admin\SellerController::class, 'reactivate'])->name('sellers.reactivate');
     Route::put('/sellers/{store}/commission', [Admin\SellerController::class, 'commission'])->name('sellers.commission');
+    Route::put('/sellers/{store}/razorpay-account', [Admin\SellerController::class, 'razorpayAccount'])->name('sellers.razorpay-account');
 
     Route::get('/products', [Admin\ProductController::class, 'index'])->name('products.index');
     Route::post('/products/bulk-approve', [Admin\ProductController::class, 'bulkApprove'])->name('products.bulk-approve');

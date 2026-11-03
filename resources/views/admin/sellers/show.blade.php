@@ -61,6 +61,16 @@
                 </div>
             </x-card>
 
+            <x-card :title="__('Automatic payouts')">
+                <form method="POST" action="{{ route('admin.sellers.razorpay-account', $store) }}" class="space-y-3">
+                    @csrf
+                    @method('PUT')
+                    <x-form.input name="razorpay_account_id" :label="__('Razorpay Route linked account ID')" :value="$store->razorpay_account_id" placeholder="acc_…"
+                        :hint="__('Create the linked account in Razorpay → Route. Leave empty to pay this seller manually.')" />
+                    <x-form.button>{{ __('Save') }}</x-form.button>
+                </form>
+            </x-card>
+
             <x-card :title="__('Commission')">
                 <form method="POST" action="{{ route('admin.sellers.commission', $store) }}" class="space-y-3">
                     @csrf

@@ -17,6 +17,8 @@
             <x-form.input name="flat_shipping_rupees" :label="__('Flat shipping per seller (₹)')" :value="Money::toRupees($settings['flat_shipping_paise'])" inputmode="decimal" required />
             <x-form.input name="free_shipping_threshold_rupees" :label="__('Free shipping above (₹, per seller)')" :value="Money::toRupees($settings['free_shipping_threshold_paise'])" inputmode="decimal" required />
             <x-form.checkbox name="cod_enabled" :label="__('Allow Cash on Delivery')" :checked="$settings['cod_enabled']" />
+            <x-form.checkbox name="route_settlement_enabled" :label="__('Pay sellers automatically with Razorpay Route')" :checked="$settings['route_settlement_enabled']"
+                :hint="__('Online payments are split to sellers with a linked account, held until delivery, and reversed if cancelled. Needs Route enabled on your Razorpay account.')" />
             <x-form.input name="return_window_days" type="number" min="0" max="90" :label="__('Return window (days after delivery)')" :value="$settings['return_window_days']" required :hint="__('0 turns returns off.')" />
         </section>
 

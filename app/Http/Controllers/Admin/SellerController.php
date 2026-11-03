@@ -73,6 +73,17 @@ class SellerController extends Controller
         return back()->with('status', __(':store reactivated.', ['store' => $store->name]));
     }
 
+    public function razorpayAccount(Request $request, Store $store): RedirectResponse
+    {
+        $account = $request->validate(['razorpay_account_id' => ['nullable', 'regex:/^acc_[A-Za-z0-9]{6,30}$/']], [
+            'razorpay_account_id.regex' => __('A linked account ID looks like acc_XXXXXXXXXXXXXX.'),
+        ])['razorpay_account_id'] ?? null;
+
+        $store->forceFill(['razorpay_account_id' => $account])->save();
+
+        return back()->with('status', $account ? __('Linked account saved. New online orders are paid out automatically.') : __('Linked account removed. Payouts are manual.'));
+    }
+
     public function commission(Request $request, Store $store): RedirectResponse
     {
         $data = $request->validate(['commission_percent' => ['nullable', 'regex:/^\d{1,2}(\.\d{1,2})?$/']], [

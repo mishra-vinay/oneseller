@@ -13,6 +13,7 @@ use App\Models\SubOrder;
 use App\Notifications\SubOrderCancelled;
 use App\Notifications\SubOrderDelivered;
 use App\Notifications\SubOrderShipped;
+use App\Services\Payments\RouteSettlement;
 use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -50,6 +51,7 @@ class Fulfilment
             $this->refreshOrder($subOrder->order);
         });
 
+        app(RouteSettlement::class)->release($subOrder);
         $subOrder->order->buyer->notify(new SubOrderDelivered($subOrder));
     }
 
@@ -81,6 +83,7 @@ class Fulfilment
             $this->refreshOrder($subOrder->order);
         });
 
+        app(RouteSettlement::class)->reverse($subOrder);
         Activity::record('order.cancelled', "Portion {$subOrder->number} cancelled by {$by->value}: {$reason}", $subOrder->order);
 
         $notification = new SubOrderCancelled($subOrder);
