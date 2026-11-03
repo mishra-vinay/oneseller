@@ -81,7 +81,8 @@ class OrderPlacement
                 $store = $products->get($variants->get($storeItems->first()->product_variant_id)->product_id)->store;
 
                 $subtotal = (int) $storeItems->sum(fn ($item) => $variants->get($item->product_variant_id)->price * $item->quantity);
-                $shipping = $this->pricing->shippingFor($subtotal);
+                $weight = (int) $storeItems->sum(fn ($item) => $variants->get($item->product_variant_id)->weight_grams * $item->quantity);
+                $shipping = $this->pricing->shippingFor($store, $subtotal, $weight);
                 $bps = $store->effectiveCommissionBps();
                 $commission = Pricing::commission($subtotal, $bps);
 

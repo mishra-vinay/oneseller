@@ -90,6 +90,7 @@
                 <div class="text-sm">
                     <div class="text-stone-500">{{ __('Sold by') }}</div>
                     <div class="font-medium">{{ $product->store->name }} · {{ $product->store->city }}</div>
+                    <div class="text-stone-500">{{ app(\App\Services\Pricing::class)->describe($product->store) }}</div>
                 </div>
             </a>
 

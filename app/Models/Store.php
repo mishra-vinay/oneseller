@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ShippingMode;
 use App\Enums\StoreStatus;
 use App\Support\Settings;
 use Database\Factories\StoreFactory;
@@ -17,6 +18,10 @@ class Store extends Model
     /** @use HasFactory<StoreFactory> */
     use HasFactory;
 
+    protected $attributes = [
+        'shipping_mode' => 'platform',
+    ];
+
     protected $fillable = [
         'name', 'description', 'phone', 'address_line1', 'address_line2',
         'city', 'state', 'pincode', 'gstin',
@@ -28,6 +33,11 @@ class Store extends Model
             'status' => StoreStatus::class,
             'approved_at' => 'datetime',
             'commission_bps' => 'integer',
+            'shipping_mode' => ShippingMode::class,
+            'shipping_flat_paise' => 'integer',
+            'shipping_slabs' => 'array',
+            'shipping_extra_kg_paise' => 'integer',
+            'shipping_free_above_paise' => 'integer',
         ];
     }
 

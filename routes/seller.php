@@ -44,6 +44,9 @@ Route::middleware(['auth', 'role:seller'])->group(function () {
         Route::get('/notifications/{id}', [NotificationController::class, 'open'])->name('notifications.open');
         Route::post('/notifications/read', [NotificationController::class, 'readAll'])->name('notifications.read');
 
+        Route::get('/shipping', [Seller\ShippingController::class, 'edit'])->name('shipping');
+        Route::put('/shipping', [Seller\ShippingController::class, 'update'])->name('shipping.update');
+
         Route::get('/store', [Seller\StoreProfileController::class, 'edit'])->name('store');
         Route::put('/store', [Seller\StoreProfileController::class, 'update'])->name('store.update');
     });

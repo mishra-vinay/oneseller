@@ -5,7 +5,7 @@
         </div>
         <div class="min-w-0 flex-1">
             <h1 class="text-2xl font-semibold">{{ $store->name }}</h1>
-            <p class="text-sm text-stone-500">{{ $store->city }}, {{ $store->state }}</p>
+            <p class="text-sm text-stone-500">{{ $store->city }}, {{ $store->state }} · {{ app(\App\Services\Pricing::class)->describe($store) }}</p>
             @if ($store->description)
                 <p class="mt-2 max-w-2xl whitespace-pre-line text-sm text-stone-700">{{ $store->description }}</p>
             @endif

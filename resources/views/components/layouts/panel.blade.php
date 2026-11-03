@@ -8,7 +8,7 @@
         ]
         : [
             ['seller.dashboard', __('Dashboard')], ['seller.products.index', __('Products')], ['seller.inventory', __('Inventory')],
-            ['seller.orders.index', __('Orders')], ['seller.customers', __('Customers')], ['seller.earnings', __('Earnings')],
+            ['seller.orders.index', __('Orders')], ['seller.customers', __('Customers')], ['seller.earnings', __('Earnings')], ['seller.shipping', __('Shipping')],
             ['seller.store', __('Store profile')],
         ];
     $nav = array_filter($nav, fn ($item) => \Illuminate\Support\Facades\Route::has($item[0]));

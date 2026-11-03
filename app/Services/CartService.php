@@ -158,12 +158,15 @@ class CartService
             ->map(function (Collection $groupItems) {
                 $buyable = $groupItems->whereNull('problem');
                 $subtotal = (int) $buyable->sum('line_total');
+                $store = $groupItems->first()->variant->product->store;
+                $weight = (int) $buyable->sum(fn (CartItem $item) => $item->variant->weight_grams * $item->quantity);
 
                 return [
-                    'store' => $groupItems->first()->variant->product->store,
+                    'store' => $store,
                     'items' => $groupItems,
                     'subtotal' => $subtotal,
-                    'shipping' => $subtotal > 0 ? $this->pricing->shippingFor($subtotal) : 0,
+                    'weight_grams' => $weight,
+                    'shipping' => $subtotal > 0 ? $this->pricing->shippingFor($store, $subtotal, $weight) : 0,
                 ];
             })
             ->values();
