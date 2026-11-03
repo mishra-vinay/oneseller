@@ -15,12 +15,13 @@ class ProductPageController extends Controller
         $model = Product::visible()
             ->where('store_id', $store->id)
             ->where('slug', $product)
-            ->with(['images', 'defaultVariant', 'category.parent', 'store'])
+            ->with(['images', 'defaultVariant', 'variants', 'category.parent', 'store'])
             ->firstOrFail();
 
         return view('storefront.product', [
             'product' => $model,
-            'variant' => $model->defaultVariant,
+            // Preselect the cheapest variant that is in stock, else the default.
+            'variant' => $model->variants->where('stock', '>', 0)->sortBy('price')->first() ?? $model->defaultVariant,
             'moreFromStore' => $catalog->base()
                 ->where('products.store_id', $store->id)
                 ->where('products.id', '!=', $model->id)

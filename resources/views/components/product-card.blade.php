@@ -10,12 +10,13 @@
         <div class="line-clamp-2 text-sm font-medium group-hover:underline">{{ $product->name }}</div>
         <div class="mt-0.5 truncate text-xs text-stone-500">{{ $product->store->name }}</div>
         <div class="mt-2 flex items-baseline gap-2 text-sm">
+            @if ($product->hasPriceRange()) <span class="text-xs text-stone-500">{{ __('From') }}</span> @endif
             <x-money :amount="$variant->price" class="font-semibold" />
             @if ($variant->compare_at_price && $variant->compare_at_price > $variant->price)
                 <s class="text-xs text-stone-500"><x-money :amount="$variant->compare_at_price" /></s>
             @endif
         </div>
-        @if ($variant->stock < 1)
+        @if ($product->totalStock() < 1)
             <div class="mt-1 text-xs font-medium text-red-700">{{ __('Out of stock') }}</div>
         @endif
     </div>

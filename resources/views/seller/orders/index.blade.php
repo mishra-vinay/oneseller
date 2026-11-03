@@ -31,7 +31,7 @@
                         </td>
                         <td class="px-4 py-3">
                             @foreach ($subOrder->items as $item)
-                                <div>{{ $item->quantity }} × {{ $item->product_name }}</div>
+                                <div>{{ $item->quantity }} × {{ $item->displayName() }}</div>
                             @endforeach
                         </td>
                         <td class="px-4 py-3 text-right"><x-money :amount="$subOrder->items_subtotal" /></td>

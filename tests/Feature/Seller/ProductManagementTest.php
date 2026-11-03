@@ -147,9 +147,9 @@ class ProductManagementTest extends TestCase
         $this->actingAs($this->store->user)->get('/seller/inventory')->assertOk()->assertSee($a->name);
 
         $this->put('/seller/inventory', ['rows' => [
-            $a->id => ['price' => '499.00', 'stock' => '3'],
-            $b->id => ['price' => '550', 'stock' => '10'],
-        ]])->assertSessionHas('status', '2 products updated. 1 price change was sent for approval.');
+            $a->defaultVariant->id => ['price' => '499.00', 'stock' => '3'],
+            $b->defaultVariant->id => ['price' => '550', 'stock' => '10'],
+        ]])->assertSessionHas('status', '2 items updated. 1 price change was sent for approval.');
 
         $this->assertSame(3, $a->defaultVariant->fresh()->stock);
         $this->assertSame(ProductStatus::Approved, $a->fresh()->status);

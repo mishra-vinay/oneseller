@@ -30,7 +30,7 @@ class SellerIsolationTest extends TestCase
         $this->get("/seller/products/{$theirs->id}/edit")->assertNotFound();
         $this->put("/seller/products/{$theirs->id}", ['name' => 'Hacked'])->assertNotFound();
         $this->delete("/seller/products/{$theirs->id}")->assertNotFound();
-        $this->put('/seller/inventory', ['rows' => [$theirs->id => ['price' => '1', 'stock' => '0']]]);
+        $this->put('/seller/inventory', ['rows' => [$theirs->defaultVariant->id => ['price' => '1', 'stock' => '0']]]);
 
         $this->assertModelExists($theirs);
         $this->assertNotSame('Hacked', $theirs->fresh()->name);

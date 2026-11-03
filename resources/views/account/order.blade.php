@@ -32,7 +32,7 @@
                     </header>
                     <ul class="divide-y divide-stone-100 text-sm">
                         @foreach ($subOrder->items as $item)
-                            <li class="flex justify-between gap-4 px-4 py-3"><span>{{ $item->quantity }} × {{ $item->product_name }}</span><x-money :amount="$item->line_total" /></li>
+                            <li class="flex justify-between gap-4 px-4 py-3"><span>{{ $item->quantity }} × {{ $item->displayName() }}</span><x-money :amount="$item->line_total" /></li>
                         @endforeach
                     </ul>
                     <footer class="space-y-1 border-t border-stone-100 px-4 py-3 text-sm text-stone-600">

@@ -16,7 +16,7 @@
                     </div>
                     <ul class="space-y-1 text-sm">
                         @foreach ($subOrder->items as $item)
-                            <li class="flex justify-between gap-4"><span>{{ $item->quantity }} × {{ $item->product_name }} <span class="text-xs text-stone-500">{{ $item->sku }}</span></span><x-money :amount="$item->line_total" /></li>
+                            <li class="flex justify-between gap-4"><span>{{ $item->quantity }} × {{ $item->displayName() }} <span class="text-xs text-stone-500">{{ $item->sku }}</span></span><x-money :amount="$item->line_total" /></li>
                         @endforeach
                     </ul>
                     <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-stone-100 pt-3 text-sm sm:grid-cols-4">

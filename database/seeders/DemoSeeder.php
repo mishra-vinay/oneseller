@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Store;
 use App\Models\User;
+use App\Services\ProductService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -51,6 +52,15 @@ class DemoSeeder extends Seeder
         $this->product($meera, $categories['home-textiles'], 'Block Print Cushion Covers (Set of 5)', 79900, null, 4, '#9333ea');
 
         $this->product($kiran, $categories['home-textiles'], 'Jute Floor Rug', 99900, null, 10, '#a16207', ProductStatus::Pending);
+
+        $this->withOptions(
+            $this->product($meera, $categories['sarees'], 'Handloom Cotton Kurta', 89900, 119900, 0, '#0369a1'),
+            ['Size' => ['S', 'M', 'L', 'XL'], 'Colour' => ['Indigo', 'Rust']],
+            fn (array $combo) => [
+                'price' => $combo['Size'] === 'XL' ? 99900 : 89900,
+                'stock' => $combo['Colour'] === 'Rust' && $combo['Size'] === 'S' ? 0 : random_int(2, 12),
+            ],
+        );
     }
 
     private function user(Role $role, string $name, string $email): User
@@ -116,7 +126,7 @@ class DemoSeeder extends Seeder
         return $store;
     }
 
-    private function product(Store $store, Category $category, string $name, int $price, ?int $compareAt, int $stock, string $color, ProductStatus $status = ProductStatus::Approved): void
+    private function product(Store $store, Category $category, string $name, int $price, ?int $compareAt, int $stock, string $color, ProductStatus $status = ProductStatus::Approved): Product
     {
         $product = Product::firstOrNew(['store_id' => $store->id, 'slug' => Str::slug($name)]);
         $product->fill([
@@ -137,6 +147,38 @@ class DemoSeeder extends Seeder
 
         if ($product->images()->doesntExist()) {
             $product->images()->create(['path' => $this->image("products/{$product->id}/demo.jpg", $name, $color), 'sort_order' => 0]);
+        }
+
+        return $product;
+    }
+
+    /**
+     * Turns a product into one variant per option combination.
+     *
+     * @param  array<string, array<int, string>>  $options
+     * @param  callable(array<string, string>): array{price: int, stock: int}  $priceAndStock
+     */
+    private function withOptions(Product $product, array $options, callable $priceAndStock): void
+    {
+        $product->option_names = array_keys($options);
+        $product->save();
+
+        $combos = ProductService::combinations(array_map(fn ($name, $values) => ['name' => $name, 'values' => $values], array_keys($options), $options));
+        $template = $product->defaultVariant()->first();
+        $baseSku = Str::before($template->sku, '-'.Str::upper(Str::slug(implode('-', $combos[0])))) ?: $template->sku;
+
+        foreach ($combos as $position => $combo) {
+            $variant = $position === 0 ? $template : $product->variants()->firstOrNew(['position' => $position]);
+            $variant->fill([
+                'sku' => $baseSku.'-'.Str::upper(Str::slug(implode('-', $combo))),
+                'options' => $combo,
+                'position' => $position,
+                'compare_at_price' => $template->compare_at_price,
+                'weight_grams' => 400,
+                ...$priceAndStock($combo),
+            ]);
+            $variant->is_default = $position === 0;
+            $product->variants()->save($variant);
         }
     }
 

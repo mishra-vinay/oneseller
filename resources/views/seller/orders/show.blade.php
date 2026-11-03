@@ -13,7 +13,7 @@
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($subOrder->items as $item)
                             <tr>
-                                <td class="py-2">{{ $item->product_name }} <span class="text-xs text-stone-500">{{ $item->sku }}</span></td>
+                                <td class="py-2">{{ $item->displayName() }} <span class="text-xs text-stone-500">{{ $item->sku }}</span></td>
                                 <td class="py-2 text-right">{{ $item->quantity }} × <x-money :amount="$item->unit_price" /></td>
                                 <td class="py-2 text-right"><x-money :amount="$item->line_total" /></td>
                             </tr>

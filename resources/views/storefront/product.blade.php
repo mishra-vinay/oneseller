@@ -34,10 +34,12 @@
         <div>
             <h1 class="text-2xl font-semibold">{{ $product->name }}</h1>
             <div class="mt-3 flex items-baseline gap-3">
-                <x-money :amount="$variant->price" class="text-2xl font-semibold" />
-                @if ($variant->compare_at_price && $variant->compare_at_price > $variant->price)
-                    <s class="text-stone-500"><x-money :amount="$variant->compare_at_price" /></s>
-                    <span class="text-sm font-medium text-emerald-700">{{ __(':pct% off', ['pct' => (int) round(100 - $variant->price * 100 / $variant->compare_at_price)]) }}</span>
+                @if ($product->hasPriceRange()) <span class="text-sm text-stone-500">{{ __('From') }}</span> @endif
+                <x-money :amount="$product->defaultVariant->price" class="text-2xl font-semibold" />
+                @php $shown = $product->defaultVariant; @endphp
+                @if ($shown->compare_at_price && $shown->compare_at_price > $shown->price)
+                    <s class="text-stone-500"><x-money :amount="$shown->compare_at_price" /></s>
+                    <span class="text-sm font-medium text-emerald-700">{{ __(':pct% off', ['pct' => (int) round(100 - $shown->price * 100 / $shown->compare_at_price)]) }}</span>
                 @endif
             </div>
             <p class="mt-1 text-xs text-stone-500">{{ __('Inclusive of all taxes') }}</p>
@@ -46,26 +48,40 @@
                 <p class="mt-4 text-stone-700">{{ $product->short_description }}</p>
             @endif
 
-            <div class="mt-4 text-sm">
-                @if ($variant->stock > 0)
-                    <span class="font-medium text-emerald-700">{{ $variant->stock <= \App\Models\ProductVariant::LOW_STOCK_THRESHOLD ? __('Only :n left in stock', ['n' => $variant->stock]) : __('In stock') }}</span>
-                @else
-                    <span class="font-medium text-red-700">{{ __('Out of stock') }}</span>
-                @endif
-            </div>
-
-            @if ($variant->stock > 0)
-                <form method="POST" action="{{ route('cart.add') }}" class="mt-4 flex items-end gap-3">
+            @php $inStock = $product->totalStock() > 0; @endphp
+            @if ($inStock)
+                <form method="POST" action="{{ route('cart.add') }}" class="mt-4 space-y-4">
                     @csrf
-                    <input type="hidden" name="variant_id" value="{{ $variant->id }}">
-                    <div>
-                        <label for="quantity" class="mb-1 block text-sm font-medium">{{ __('Quantity') }}</label>
-                        <input id="quantity" name="quantity" type="number" min="1" max="{{ $variant->stock }}" value="1" class="w-20 rounded-md border border-stone-300 px-3 py-2">
+                    @if ($product->hasOptions())
+                        <fieldset>
+                            <legend class="mb-2 text-sm font-medium">{{ implode(' / ', $product->option_names) }}</legend>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($product->variants as $option)
+                                    <label @class(['cursor-pointer rounded-md border px-3 py-2 text-sm has-[:checked]:border-stone-900 has-[:checked]:bg-stone-900 has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-stone-900 has-[:focus-visible]:ring-offset-2', 'border-stone-300 bg-white' => $option->stock > 0, 'cursor-not-allowed border-dashed border-stone-300 text-stone-400' => $option->stock < 1])>
+                                        <input type="radio" name="variant_id" value="{{ $option->id }}" class="sr-only" @checked($option->is($variant)) @disabled($option->stock < 1)>
+                                        {{ $option->label() }}
+                                        @if ($product->hasPriceRange()) · <x-money :amount="$option->price" /> @endif
+                                        @if ($option->stock < 1) · {{ __('sold out') }} @elseif ($option->stock <= \App\Models\ProductVariant::LOW_STOCK_THRESHOLD) · {{ __(':n left', ['n' => $option->stock]) }} @endif
+                                    </label>
+                                @endforeach
+                            </div>
+                        </fieldset>
+                    @else
+                        <input type="hidden" name="variant_id" value="{{ $variant->id }}">
+                        <p class="text-sm font-medium text-emerald-700">{{ $variant->stock <= \App\Models\ProductVariant::LOW_STOCK_THRESHOLD ? __('Only :n left in stock', ['n' => $variant->stock]) : __('In stock') }}</p>
+                    @endif
+                    <div class="flex items-end gap-3">
+                        <div>
+                            <label for="quantity" class="mb-1 block text-sm font-medium">{{ __('Quantity') }}</label>
+                            <input id="quantity" name="quantity" type="number" min="1" max="{{ $product->variants->max('stock') }}" value="1" class="w-20 rounded-md border border-stone-300 px-3 py-2">
+                        </div>
+                        <x-form.button>{{ __('Add to cart') }}</x-form.button>
                     </div>
-                    <x-form.button>{{ __('Add to cart') }}</x-form.button>
                 </form>
-                @error('quantity') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+            @else
+                <p class="mt-4 text-sm font-medium text-red-700">{{ __('Out of stock') }}</p>
             @endif
+            @error('quantity') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
 
             <a href="{{ route('store.show', $product->store) }}" class="mt-6 flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-4 hover:border-stone-400">
                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-stone-200">
@@ -78,7 +94,9 @@
             </a>
 
             <dl class="mt-6 text-sm text-stone-600">
-                <div class="flex gap-2"><dt>{{ __('SKU') }}:</dt><dd>{{ $variant->sku }}</dd></div>
+                @unless ($product->hasOptions())
+                    <div class="flex gap-2"><dt>{{ __('SKU') }}:</dt><dd>{{ $variant->sku }}</dd></div>
+                @endunless
             </dl>
         </div>
     </div>

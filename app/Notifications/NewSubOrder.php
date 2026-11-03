@@ -30,7 +30,7 @@ class NewSubOrder extends MarketplaceNotification
             ->line("You have a new order to fulfil ({$subOrder->order->payment_method->label()}).");
 
         foreach ($subOrder->items as $item) {
-            $mail->line("{$item->quantity} × {$item->product_name} ({$item->sku}) — ".Money::format($item->line_total));
+            $mail->line("{$item->quantity} × {$item->displayName()} ({$item->sku}) — ".Money::format($item->line_total));
         }
 
         return $mail

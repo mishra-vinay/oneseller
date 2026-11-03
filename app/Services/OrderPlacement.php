@@ -104,6 +104,7 @@ class OrderPlacement
                         'product_id' => $product->id,
                         'product_variant_id' => $variant->id,
                         'product_name' => $product->name,
+                        'variant_label' => $variant->label(),
                         'sku' => $variant->sku,
                         'unit_price' => $variant->price,
                         'quantity' => $item->quantity,

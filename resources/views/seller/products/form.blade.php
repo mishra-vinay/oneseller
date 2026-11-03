@@ -19,7 +19,7 @@
                 <div class="mt-1 text-red-800">{{ __('Correct it and press "Submit for approval" again.') }}</div>
             </div>
         @elseif ($product->status === ProductStatus::Approved)
-            <p class="mb-4 text-sm text-stone-600">{{ __('Changing the name, descriptions, price or images sends this product back for review. Stock and publishing do not.') }}</p>
+            <p class="mb-4 text-sm text-stone-600">{{ __('Changing the name, descriptions, options, prices or images sends this product back for review. Stock and publishing do not.') }}</p>
         @endif
     @endif
 
@@ -45,6 +45,56 @@
                 </div>
             </x-card>
 
+            <x-card :title="__('Options (size, colour…)')">
+                <p class="mb-3 text-sm text-stone-600">{{ __('Optional. Add up to two options with comma-separated values, e.g. Size: S, M, L. Each combination becomes a variant with its own SKU, price and stock.') }}</p>
+                @php $savedOptions = collect($product->option_names ?? [])->map(fn ($name) => ['name' => $name, 'values' => $product->variants->pluck('options.'.$name)->filter()->unique()->implode(', ')]); @endphp
+                <div class="grid gap-3 sm:grid-cols-[10rem_1fr]">
+                    @foreach (range(0, \App\Services\ProductService::MAX_OPTIONS - 1) as $i)
+                        <x-form.input :name="'options['.$i.'][name]'" :label="__('Option :n name', ['n' => $i + 1])" :value="old('options.'.$i.'.name', $savedOptions[$i]['name'] ?? '')" :placeholder="$i === 0 ? __('Size') : __('Colour')" />
+                        <x-form.input :name="'options['.$i.'][values]'" :label="__('Values')" :value="old('options.'.$i.'.values', $savedOptions[$i]['values'] ?? '')" :placeholder="$i === 0 ? 'S, M, L' : 'Red, Blue'" />
+                    @endforeach
+                </div>
+                @error('options') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+                @if (! $product->hasOptions())
+                    <p class="mt-3 text-xs text-stone-500">{{ __('After saving, you can set the price and stock of each combination.') }}</p>
+                @endif
+            </x-card>
+
+            @if ($product->hasOptions())
+                <x-card :title="__('Variants')">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="text-left text-xs uppercase text-stone-500">
+                                <tr>
+                                    <th class="py-2 pr-2">{{ __('Variant') }}</th>
+                                    <th class="py-2 pr-2">{{ __('SKU') }}</th>
+                                    <th class="py-2 pr-2">{{ __('Price (₹)') }}</th>
+                                    <th class="py-2 pr-2">{{ __('Compare-at (₹)') }}</th>
+                                    <th class="py-2 pr-2">{{ __('Stock') }}</th>
+                                    <th class="py-2">{{ __('Weight (g)') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                @foreach ($product->variants as $v)
+                                    <tr>
+                                        <td class="py-2 pr-2 font-medium whitespace-nowrap">{{ $v->label() }}</td>
+                                        <td class="py-2 pr-2"><input name="variants[{{ $v->id }}][sku]" value="{{ old("variants.{$v->id}.sku", $v->sku) }}" required maxlength="64" aria-label="{{ __('SKU for :v', ['v' => $v->label()]) }}" class="w-32 rounded-md border border-stone-300 px-2 py-1"></td>
+                                        <td class="py-2 pr-2"><input name="variants[{{ $v->id }}][price]" value="{{ old("variants.{$v->id}.price", Money::toRupees($v->price)) }}" required inputmode="decimal" aria-label="{{ __('Price for :v', ['v' => $v->label()]) }}" class="w-24 rounded-md border border-stone-300 px-2 py-1"></td>
+                                        <td class="py-2 pr-2"><input name="variants[{{ $v->id }}][compare_at_price]" value="{{ old("variants.{$v->id}.compare_at_price", $v->compare_at_price ? Money::toRupees($v->compare_at_price) : '') }}" inputmode="decimal" aria-label="{{ __('Compare-at price for :v', ['v' => $v->label()]) }}" class="w-24 rounded-md border border-stone-300 px-2 py-1"></td>
+                                        <td class="py-2 pr-2"><input name="variants[{{ $v->id }}][stock]" type="number" min="0" value="{{ old("variants.{$v->id}.stock", $v->stock) }}" required aria-label="{{ __('Stock for :v', ['v' => $v->label()]) }}" class="w-20 rounded-md border border-stone-300 px-2 py-1"></td>
+                                        <td class="py-2"><input name="variants[{{ $v->id }}][weight_grams]" type="number" min="0" value="{{ old("variants.{$v->id}.weight_grams", $v->weight_grams) }}" aria-label="{{ __('Weight for :v', ['v' => $v->label()]) }}" class="w-20 rounded-md border border-stone-300 px-2 py-1"></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @if ($errors->has('variants.*'))
+                        <p class="mt-2 text-sm text-red-600">{{ __('Check the highlighted variant rows: every variant needs a SKU, a price in rupees and a stock count.') }}</p>
+                    @endif
+                    <p class="mt-2 text-xs text-stone-500">{{ __('New option values added above start with zero stock.') }}</p>
+                </x-card>
+            @endif
+
             <x-card :title="__('Images (up to :max)', ['max' => \App\Models\Product::MAX_IMAGES])">
                 @if ($editing && $product->images->isNotEmpty())
                     <div class="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
@@ -65,15 +115,17 @@
         </div>
 
         <div class="space-y-6">
+            @unless ($product->hasOptions())
             <x-card :title="__('Price and stock')">
-                <div class="space-y-4">
-                    <x-form.input name="price" :label="__('Price (₹, incl. GST)')" :value="$variant ? Money::toRupees($variant->price) : null" required inputmode="decimal" />
-                    <x-form.input name="compare_at_price" :label="__('Compare-at price (₹, optional)')" :value="$variant && $variant->compare_at_price ? Money::toRupees($variant->compare_at_price) : null" inputmode="decimal" :hint="__('Shown struck through when higher than the price.')" />
-                    <x-form.input name="stock" type="number" min="0" :label="__('Stock')" :value="$variant?->stock ?? 0" required />
-                    <x-form.input name="sku" :label="__('SKU')" :value="$variant?->sku" required maxlength="64" />
-                    <x-form.input name="weight_grams" type="number" min="0" :label="__('Weight (grams)')" :value="$variant?->weight_grams" />
-                </div>
-            </x-card>
+                    <div class="space-y-4">
+                        <x-form.input name="price" :label="__('Price (₹, incl. GST)')" :value="$variant ? Money::toRupees($variant->price) : null" required inputmode="decimal" />
+                        <x-form.input name="compare_at_price" :label="__('Compare-at price (₹, optional)')" :value="$variant && $variant->compare_at_price ? Money::toRupees($variant->compare_at_price) : null" inputmode="decimal" :hint="__('Shown struck through when higher than the price.')" />
+                        <x-form.input name="stock" type="number" min="0" :label="__('Stock')" :value="$variant?->stock ?? 0" required />
+                        <x-form.input name="sku" :label="__('SKU')" :value="$variant?->sku" required maxlength="64" />
+                        <x-form.input name="weight_grams" type="number" min="0" :label="__('Weight (grams)')" :value="$variant?->weight_grams" />
+                    </div>
+                </x-card>
+            @endunless
 
             <x-card>
                 <x-form.checkbox name="is_published" :label="__('Published')" :checked="$product->is_published ?? true" :hint="__('Untick to hide it from the storefront without deleting it.')" />

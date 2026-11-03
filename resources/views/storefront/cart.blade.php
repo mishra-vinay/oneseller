@@ -31,6 +31,7 @@
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <a href="{{ $product->url() }}" class="font-medium hover:underline">{{ $product->name }}</a>
+                                        @if ($item->variant->label()) <div class="text-sm text-stone-600">{{ $item->variant->label() }}</div> @endif
                                         <div class="text-sm text-stone-500"><x-money :amount="$item->variant->price" /> {{ __('each') }}</div>
                                         @if ($item->problem)
                                             <div class="mt-1 text-sm font-medium text-red-700">{{ $item->problem }}</div>

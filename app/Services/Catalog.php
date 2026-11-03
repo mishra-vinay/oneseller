@@ -34,7 +34,7 @@ class Catalog
             ->visible()
             ->join('product_variants as dv', fn ($join) => $join->on('dv.product_id', '=', 'products.id')->where('dv.is_default', true))
             ->select('products.*')
-            ->with(['store', 'images', 'defaultVariant']);
+            ->with(['store', 'images', 'defaultVariant', 'variants']);
     }
 
     /**
@@ -85,7 +85,7 @@ class Catalog
         }
 
         if ($request->boolean('in_stock')) {
-            $query->where('dv.stock', '>', 0);
+            $query->whereHas('variants', fn ($v) => $v->where('stock', '>', 0));
         }
 
         match ($request->query('sort')) {

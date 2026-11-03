@@ -16,7 +16,7 @@
                         </div>
                         <ul class="space-y-2 text-sm">
                             @foreach ($group['items'] as $item)
-                                <li class="flex justify-between gap-4"><span>{{ $item->quantity }} × {{ $item->variant->product->name }}</span><x-money :amount="$item->line_total" /></li>
+                                <li class="flex justify-between gap-4"><span>{{ $item->quantity }} × {{ $item->variant->product->name }}@if ($item->variant->label()) ({{ $item->variant->label() }})@endif</span><x-money :amount="$item->line_total" /></li>
                             @endforeach
                         </ul>
                     </x-card>

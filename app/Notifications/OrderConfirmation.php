@@ -32,7 +32,7 @@ class OrderConfirmation extends MarketplaceNotification
             $mail->line("**{$subOrder->store->name}** ({$subOrder->number})");
 
             foreach ($subOrder->items as $item) {
-                $mail->line("{$item->quantity} × {$item->product_name} — ".Money::format($item->line_total));
+                $mail->line("{$item->quantity} × {$item->displayName()} — ".Money::format($item->line_total));
             }
 
             $mail->line('Shipping: '.($subOrder->shipping ? Money::format($subOrder->shipping) : 'Free'));

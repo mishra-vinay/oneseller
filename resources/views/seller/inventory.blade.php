@@ -24,19 +24,19 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-stone-100">
-                    @forelse ($products as $product)
-                        @php $variant = $product->defaultVariant; @endphp
+                    @forelse ($variants as $variant)
+                        @php $product = $variant->product; @endphp
                         <tr>
-                            <td class="px-4 py-2"><a href="{{ route('seller.products.edit', $product->id) }}" class="hover:underline">{{ $product->name }}</a></td>
+                            <td class="px-4 py-2"><a href="{{ route('seller.products.edit', $product->id) }}" class="hover:underline">{{ $product->name }}</a>@if ($variant->label()) <span class="text-stone-500">· {{ $variant->label() }}</span>@endif</td>
                             <td class="px-4 py-2 text-stone-600">{{ $variant->sku }}</td>
                             <td class="px-4 py-2"><x-badge :status="$product->status" /></td>
                             <td class="px-4 py-2">
-                                <input name="rows[{{ $product->id }}][price]" value="{{ old("rows.{$product->id}.price", Money::toRupees($variant->price)) }}" inputmode="decimal" aria-label="{{ __('Price for :name', ['name' => $product->name]) }}"
-                                       @class(['w-full rounded-md border px-2 py-1 tabular-nums', 'border-red-400' => $errors->has("rows.{$product->id}.price"), 'border-stone-300' => ! $errors->has("rows.{$product->id}.price")])>
+                                <input name="rows[{{ $variant->id }}][price]" value="{{ old("rows.{$variant->id}.price", Money::toRupees($variant->price)) }}" inputmode="decimal" aria-label="{{ __('Price for :name', ['name' => trim($product->name.' '.$variant->label())]) }}"
+                                       @class(['w-full rounded-md border px-2 py-1 tabular-nums', 'border-red-400' => $errors->has("rows.{$variant->id}.price"), 'border-stone-300' => ! $errors->has("rows.{$variant->id}.price")])>
                             </td>
                             <td class="px-4 py-2">
-                                <input name="rows[{{ $product->id }}][stock]" type="number" min="0" value="{{ old("rows.{$product->id}.stock", $variant->stock) }}" aria-label="{{ __('Stock for :name', ['name' => $product->name]) }}"
-                                       @class(['w-full rounded-md border px-2 py-1 tabular-nums', 'border-red-400' => $errors->has("rows.{$product->id}.stock"), 'border-amber-400 bg-amber-50' => $variant->isLowStock(), 'border-stone-300' => ! $variant->isLowStock()])>
+                                <input name="rows[{{ $variant->id }}][stock]" type="number" min="0" value="{{ old("rows.{$variant->id}.stock", $variant->stock) }}" aria-label="{{ __('Stock for :name', ['name' => trim($product->name.' '.$variant->label())]) }}"
+                                       @class(['w-full rounded-md border px-2 py-1 tabular-nums', 'border-red-400' => $errors->has("rows.{$variant->id}.stock"), 'border-amber-400 bg-amber-50' => $variant->isLowStock(), 'border-stone-300' => ! $variant->isLowStock()])>
                             </td>
                         </tr>
                     @empty
@@ -45,10 +45,10 @@
                 </tbody>
             </table>
         </div>
-        @if ($products->isNotEmpty())
+        @if ($variants->isNotEmpty())
             <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <x-form.button>{{ __('Save all changes') }}</x-form.button>
-                {{ $products->links() }}
+                {{ $variants->links() }}
             </div>
         @endif
     </form>

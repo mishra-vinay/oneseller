@@ -17,6 +17,14 @@ class OrderItem extends Model
         return ['unit_price' => 'integer', 'quantity' => 'integer', 'line_total' => 'integer'];
     }
 
+    /**
+     * "T-Shirt (M / Red)", or just the name for a product without options.
+     */
+    public function displayName(): string
+    {
+        return $this->variant_label ? "{$this->product_name} ({$this->variant_label})" : $this->product_name;
+    }
+
     public function subOrder(): BelongsTo
     {
         return $this->belongsTo(SubOrder::class);

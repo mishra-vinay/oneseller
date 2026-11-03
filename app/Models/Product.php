@@ -27,6 +27,7 @@ class Product extends Model
             'is_published' => 'boolean',
             'admin_disabled' => 'boolean',
             'approved_at' => 'datetime',
+            'option_names' => 'array',
         ];
     }
 
@@ -42,7 +43,30 @@ class Product extends Model
 
     public function variants(): HasMany
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function hasOptions(): bool
+    {
+        return ! empty($this->option_names);
+    }
+
+    /**
+     * Stock across all variants. Uses the loaded variants when available.
+     */
+    public function totalStock(): int
+    {
+        return (int) ($this->relationLoaded('variants') ? $this->variants->sum('stock') : $this->variants()->sum('stock'));
+    }
+
+    /**
+     * True when variants have different prices, so listings show "From ₹…".
+     */
+    public function hasPriceRange(): bool
+    {
+        $variants = $this->relationLoaded('variants') ? $this->variants : $this->variants()->get(['price']);
+
+        return $variants->pluck('price')->unique()->count() > 1;
     }
 
     public function defaultVariant(): HasOne
