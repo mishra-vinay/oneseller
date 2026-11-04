@@ -86,7 +86,8 @@ class ApiAuthTest extends TestCase
 
     public function test_errors_are_json(): void
     {
-        $this->get('/api/v1/products/999999')->assertNotFound()->assertJsonStructure(['message']);
+        $this->get('/api/v1/products/999999')->assertNotFound()->assertExactJson(['message' => 'Not found.']);
+        $this->getJson('/api/v1/stores/no-such-store')->assertNotFound()->assertExactJson(['message' => 'Not found.']);
         $this->post('/api/v1/auth/login', [])->assertUnprocessable()->assertJsonStructure(['message', 'errors']);
     }
 }
