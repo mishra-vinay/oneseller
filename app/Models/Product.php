@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ProductStatus;
+use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+class Product extends Model
+{
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory;
+
+    public const MAX_IMAGES = 5;
+
+    protected $fillable = ['category_id', 'name', 'short_description', 'description', 'is_published'];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => ProductStatus::class,
+            'is_published' => 'boolean',
+            'admin_disabled' => 'boolean',
+            'approved_at' => 'datetime',
+            'option_names' => 'array',
+            'rating_avg' => 'float',
+            'rating_count' => 'integer',
+        ];
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function variants(): HasMany
+    {
+        // chaperone(): each variant knows its product without another query (labels need the option order).
+        return $this->hasMany(ProductVariant::class)->orderBy('position')->orderBy('id')->chaperone('product');
+    }
+
+    public function hasOptions(): bool
+    {
+        return ! empty($this->option_names);
+    }
+
+    /**
+     * Stock across all variants. Uses the loaded variants when available.
+     */
+    public function totalStock(): int
+    {
+        return (int) ($this->relationLoaded('variants') ? $this->variants->sum('stock') : $this->variants()->sum('stock'));
+    }
+
+    /**
+     * True when variants have different prices, so listings show "From ₹…".
+     */
+    public function hasPriceRange(): bool
+    {
+        $variants = $this->relationLoaded('variants') ? $this->variants : $this->variants()->get(['price']);
+
+        return $variants->pluck('price')->unique()->count() > 1;
+    }
+
+    public function defaultVariant(): HasOne
+    {
+        return $this->hasOne(ProductVariant::class)->where('is_default', true)->chaperone('product');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Products a buyer may see: approved, published, not disabled by an admin,
+     * in an active category, from a live store.
+     */
+    public function scopeVisible(Builder $query): void
+    {
+        $query->where('products.status', ProductStatus::Approved)
+            ->where('products.is_published', true)
+            ->where('products.admin_disabled', false)
+            ->whereHas('store', fn ($q) => $q->live())
+            ->whereHas('category', fn ($q) => $q->active());
+    }
+
+    public function isVisible(): bool
+    {
+        return static::query()->visible()->whereKey($this->id)->exists();
+    }
+
+    public function url(): string
+    {
+        return route('product.show', [$this->store->slug, $this->slug]);
+    }
+
+    public function primaryImageUrl(): ?string
+    {
+        return $this->images->first()?->url();
+    }
+}
