@@ -1,2 +1,16 @@
 User-agent: *
-Disallow:
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /admin
+Disallow: /seller/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /language/
+Disallow: /currency/
+Disallow: /notifications
+Disallow: /api/
+Allow: /seller/register
+
+Sitemap: https://oneseller.co.in/sitemap.xml
