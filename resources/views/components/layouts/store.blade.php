@@ -92,9 +92,12 @@
                             <button class="min-h-11 rounded-md px-2.5 text-brand-100 hover:bg-brand-800 hover:text-white">{{ __('Log out') }}</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="flex min-h-11 flex-col justify-center rounded-md px-2.5 leading-tight hover:bg-brand-800">
-                            <span class="text-xs text-brand-100">{{ __('Hello, log in') }}</span>
-                            <span class="font-semibold">{{ __('Account & orders') }}</span>
+                        <a href="{{ route('login') }}" class="flex min-h-11 items-center rounded-md px-2.5 leading-tight hover:bg-brand-800" aria-label="{{ __('Log in') }}: {{ __('Account & orders') }}">
+                            <x-icon name="user" :size="24" class="sm:hidden" />
+                            <span class="hidden flex-col sm:flex">
+                                <span class="text-xs text-brand-100">{{ __('Hello, log in') }}</span>
+                                <span class="font-semibold">{{ __('Account & orders') }}</span>
+                            </span>
                         </a>
                         <a href="{{ route('register') }}" class="hidden min-h-11 items-center rounded-md px-2.5 font-semibold hover:bg-brand-800 lg:flex">{{ __('Sign up') }}</a>
                     @endauth
@@ -105,7 +108,7 @@
                                 <span class="absolute -right-2 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-saffron-500 px-1 text-xs font-bold text-saffron-950">{{ $cartCount }}</span>
                             @endif
                         </span>
-                        <span>{{ __('Cart') }}<span class="sr-only">, {{ trans_choice(':count item|:count items', $cartCount) }}</span></span>
+                        <span><span class="hidden sm:inline">{{ __('Cart') }}</span><span class="sr-only sm:hidden">{{ __('Cart') }}</span><span class="sr-only">, {{ trans_choice(':count item|:count items', $cartCount) }}</span></span>
                     </a>
                 </nav>
             @endunless

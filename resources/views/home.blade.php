@@ -56,11 +56,17 @@
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
                 @foreach ($categories as $category)
                     <a href="{{ route('category.show', $category) }}" class="group panel flex flex-col gap-2.5 p-3 transition hover:shadow-[0_6px_20px_rgba(16,32,31,.10)]">
-                        <div class="aspect-[4/3] overflow-hidden rounded-lg bg-stone-200">
-                            @if ($category->imageUrl())
+                        @if ($category->imageUrl())
+                            <div class="aspect-[4/3] overflow-hidden rounded-lg bg-stone-200">
                                 <img src="{{ $category->imageUrl() }}" alt="" width="400" height="300" loading="lazy" decoding="async" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
-                            @endif
-                        </div>
+                            </div>
+                        @else
+                            @php $tone = ['bg-[#1e3a8a]', 'bg-[#9f1239]', 'bg-[#b45309]', 'bg-[#b91c1c]', 'bg-[#14532d]', 'bg-[#6d28d9]'][$loop->index % 6]; @endphp
+                            <div aria-hidden="true" class="relative flex aspect-[4/3] items-end overflow-hidden rounded-lg p-4 {{ $tone }}">
+                                <span class="absolute -right-8 -top-8 h-28 w-28 rounded-full border-[14px] border-white/15"></span>
+                                <span class="relative font-display text-xl font-extrabold leading-tight text-white">{{ $category->name }}</span>
+                            </div>
+                        @endif
                         <div class="px-1">
                             <div class="font-display font-bold group-hover:text-brand-600">{{ $category->name }}</div>
                             @if ($category->children->isNotEmpty())
